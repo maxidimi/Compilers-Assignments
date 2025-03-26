@@ -8,6 +8,8 @@ public class parser {
     public static void main(String[] args) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         while ((input = reader.readLine()) != null) {
+            // Reset index on each new input/line
+            index = 0;
             
             // If input is "q" then exit
             if (input.equals("q")) {
@@ -16,23 +18,25 @@ public class parser {
             }
 
             // First syntax error check
-            if (input.length() == 0 || input.length() == 2) {
+            if (input.length() == 0) {
                 System.out.println("Syntax error: length");
                 continue;
             }
 
-            // Error if something differs than '+', '-', '**' and numbers or whitespaces
-            if (!input.matches("[0-9\\+\\-\\*\\s]+")) {
+            // Error if something differs than '+', '-', '**' , '(', ')', numbers or whitespaces
+            if (!input.matches("[0-9\\+\\-\\*\\s\\(\\)]+")) {
                 System.out.println("Syntax error: invalid characters");
                 continue;
             }
 
-            // Remove all spaces from input
-            //input = input.replaceAll("\\s", "");
+            // Prevent "11 11" to "1111"
+            if (input.matches(".*\\d\\s+\\d.*")) {
+                System.err.println("parse error: invalid input format (num)");
+                continue;
+            }
 
-            // Parse number
-            //int number = parseNumber();
-            //System.out.println("Number: " + number);
+            // Remove all spaces from input
+            input = input.replaceAll("\\s", "");
 
             System.out.println("Input: " + input);
         }
