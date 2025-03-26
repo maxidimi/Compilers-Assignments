@@ -17,19 +17,19 @@ public class parser {
                 break;
             }
 
-            // First syntax error check
+            // Error if input is empty
             if (input.length() == 0) {
                 System.out.println("Syntax error: length");
                 continue;
             }
 
-            // Error if something differs than '+', '-', '**' , '(', ')', numbers or whitespaces
+            // Error if input differs than '+', '-', '**' , '(', ')', numbers or whitespaces
             if (!input.matches("[0-9\\+\\-\\*\\s\\(\\)]+")) {
                 System.out.println("Syntax error: invalid characters");
                 continue;
             }
 
-            // Prevent "11 11" to "1111"
+            // Prevent "11 11" to "1111" after removing spaces
             if (input.matches(".*\\d\\s+\\d.*")) {
                 System.err.println("Parse error: invalid input format");
                 continue;
@@ -44,19 +44,45 @@ public class parser {
                 continue;
             }
 
-            // Identify the expression (number, operator or parenthesis)
-            while (index < input.length()) {
-                char current = input.charAt(index);
-                if (Character.isDigit(current)) {
-                    System.out.println("Number: " + parseNumber());
-                } else {
-                    System.out.println("Operator: " + current);
-                    index++;
-                }
+            try {
+                // Evaluate the expression
+                int result = expr(input);
+                System.out.println("Result: " + result);
+            } catch (RuntimeException e) {
+                System.err.println("Parse error: " + e.getMessage());
+            } finally {
+                
             }
-
-            System.out.println("Input: " + input);
         }
+    }
+
+    private static int expr(String input) {
+        int result = 0;
+        while (index < input.length()) {
+            char current = input.charAt(index);
+            if (Character.isDigit(current)) {
+                result = parseNumber();
+            } else if (current == '+') {
+                index++;
+                result += parseNumber();
+            } else if (current == '-') {
+                index++;
+                result -= parseNumber();
+            } else if (current == '*') {
+                index++;
+                result *= parseNumber();
+            } else if (current == '(') {
+                index++;
+                result = expr(input);
+            } else if (current == ')') {
+                index++;
+                return result;
+            } else {
+                throw new RuntimeException("Invalid operator: " + current);
+            }
+        }
+
+        return result;
     }
 
     // Parse number from input
