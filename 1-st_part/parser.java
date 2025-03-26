@@ -31,12 +31,29 @@ public class parser {
 
             // Prevent "11 11" to "1111"
             if (input.matches(".*\\d\\s+\\d.*")) {
-                System.err.println("parse error: invalid input format (num)");
+                System.err.println("Parse error: invalid input format");
                 continue;
             }
 
             // Remove all spaces from input
             input = input.replaceAll("\\s", "");
+
+            // If input is empty after removing spaces
+            if (input.length() == 0) {
+                System.out.println("Syntax error: empty");
+                continue;
+            }
+
+            // Identify the expression (number, operator or parenthesis)
+            while (index < input.length()) {
+                char current = input.charAt(index);
+                if (Character.isDigit(current)) {
+                    System.out.println("Number: " + parseNumber());
+                } else {
+                    System.out.println("Operator: " + current);
+                    index++;
+                }
+            }
 
             System.out.println("Input: " + input);
         }
