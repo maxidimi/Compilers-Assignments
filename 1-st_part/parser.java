@@ -8,6 +8,7 @@ public class parser {
     public static void main(String[] args) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         while ((input = reader.readLine()) != null) {
+            System.out.println("\n");
             // Reset index on each new input/line
             index = 0;
             
@@ -44,9 +45,8 @@ public class parser {
                 continue;
             }
 
-            try {
-                // Evaluate the expression
-                int result = expr(input);
+            try { // Evaluate the expression
+                int result = parseExp();
                 System.out.println("Result: " + result);
             } catch (RuntimeException e) {
                 System.err.println("Parse error: " + e.getMessage());
@@ -56,33 +56,38 @@ public class parser {
         }
     }
 
-    private static int expr(String input) {
-        int result = 0;
-        while (index < input.length()) {
-            char current = input.charAt(index);
-            if (Character.isDigit(current)) {
-                result = parseNumber();
-            } else if (current == '+') {
-                index++;
-                result += parseNumber();
-            } else if (current == '-') {
-                index++;
-                result -= parseNumber();
-            } else if (current == '*') {
-                index++;
-                result *= parseNumber();
-            } else if (current == '(') {
-                index++;
-                result = expr(input);
-            } else if (current == ')') {
-                index++;
-                return result;
-            } else {
-                throw new RuntimeException("Invalid operator: " + current);
+    private static int parseExp() {
+        int result = parseTerm();
+        return parseExp2(result);
+    }
+
+    private static int parseTerm() {
+        if (input.charAt(index) == '(') {
+            index++;
+            int result = parseExp();
+            if (input.charAt(index) != ')') {
+                throw new RuntimeException("Expected ')'");
             }
+            index++;
+            return result;
+        } else {
+            return parseNumber();
+        }
+    }
+
+    private static int parseExp2(int term) {
+        char operator = input.charAt(index);
+        if (operator != '+' && operator != '-') {
+            return term;
+        } else {
+            index++;
         }
 
-        return result;
+        if (operator == '+') {
+            return term + parseTerm();
+        } else {
+            return term - parseTerm();
+        }
     }
 
     // Parse number from input
