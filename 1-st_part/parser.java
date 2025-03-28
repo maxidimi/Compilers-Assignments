@@ -8,25 +8,24 @@ public class parser {
     public static void main(String[] args) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         while ((input = reader.readLine()) != null) {
-            System.out.println("\n");
             // Reset index on each new input/line
             index = 0;
-            
+
+            // Error if input is empty
+            if (input.length() == 0) {
+                System.out.println("Syntax error: empty input");
+                continue;
+            }
+
             // If input is "q" then exit
             if (input.equals("q")) {
                 System.out.println("Exit");
                 break;
             }
 
-            // Error if input is empty
-            if (input.length() == 0) {
-                System.out.println("Syntax error: length");
-                continue;
-            }
-
             // Error if input differs than '+', '-', '**' , '(', ')', numbers or whitespaces
             if (!input.matches("[0-9\\+\\-\\*\\s\\(\\)]+")) {
-                System.out.println("Syntax error: invalid characters");
+                System.err.println("Syntax error: invalid characters");
                 continue;
             }
 
@@ -41,14 +40,14 @@ public class parser {
 
             // If input is empty after removing spaces
             if (input.length() == 0) {
-                System.out.println("Syntax error: empty");
+                System.err.println("Syntax error: empty input/only spaces provided");
                 continue;
             }
 
             try { // Evaluate the expression
                 int result = parseExp();
                 if (index < input.length()) {
-                    throw new RuntimeException("Parse error");
+                    throw new RuntimeException("Parse error: not all input consumed");
                 }
                 System.out.println("Result: " + result);
             } catch (RuntimeException e) {
@@ -59,30 +58,21 @@ public class parser {
         }
     }
 
-    private static void outOfBounds() {
-        if (index >= input.length()) {
-            throw new RuntimeException("Out of bounds");
-        }
-    }
-
     private static int parseExp() {
         int result = parseTerm();
         return parseExp2(result);
     }
+
     private static int parseExp2(int term) {
-        if (input.charAt(index) == '+') {
-            index++;
-
+        if (equal('+')) {
             int parseTerm = parseTerm();
 
-            return term + parseExp2(parseTerm);
-        } else if (input.charAt(index) == '-') {
-            index++;
-
+            return parseExp2(term + parseTerm);
+        } else if (equal('-')) {
             int parseTerm = parseTerm();
 
-            return term - parseExp2(parseTerm);
-        } else {
+            return parseExp2(term - parseTerm);
+        } else { // ε
             return term;
         }
     }
@@ -93,28 +83,22 @@ public class parser {
     }
 
     private static int parseTerm2(int factor) {
-        if (input.charAt(index) == '*' && input.charAt(index + 1) == '*') {
-            index += 2;
-
+        if (equal('*') && equal('*')) {
             int parseFactor = parseFactor();
 
-            return (int) Math.pow(factor, parseFactor);
-        } else {
+            return parseTerm2((int) Math.pow(factor, parseFactor));
+        } else { // ε
             return factor;
         }
     }
 
     private static int parseFactor() {
-        if (input.charAt(index) == '(') {
-            index++;
-
+        if (equal('(')) {
             int result = parseExp();
 
-            if (input.charAt(index) != ')') {
-                throw new RuntimeException("Expected ')'");
+            if (!equal(')')) {
+                throw new RuntimeException("Parse error: Expected ')'");
             }
-
-            index++;
 
             return result;
         } else {
@@ -124,9 +108,13 @@ public class parser {
 
     // Parse number from input
     private static int parseNumber() {
+        if (!isDigit()) {
+            throw new RuntimeException("Expected number");
+        }
+
         int number = 0;
-        
-        while (index < input.length() && Character.isDigit(input.charAt(index))) {
+
+        while (isDigit()) {
             number = number * 10 + (input.charAt(index) - '0');
             index++;
         }
@@ -134,4 +122,28 @@ public class parser {
         return number;
     }
 
+    private static boolean isDigit() {
+        return index < input.length() && Character.isDigit(input.charAt(index));
+    }
+
+    private static char consume() {
+        if (index >= input.length()) {
+            throw new RuntimeException("Unexpected end of input");
+        }
+
+        return input.charAt(index++);
+    }
+
+    // Check if c is equal to next char in input & not out of bounds
+    private static boolean equal(char c) {
+        if (index < input.length() && input.charAt(index) == c) {
+            index++;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    //? Check for * which are not followed by *
+    //? Precedence in a**b**c
 }
