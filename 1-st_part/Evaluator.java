@@ -73,34 +73,31 @@ public class Evaluator {
             }
             return result;
         } else if (isDigit()) { // num
-            return parseNumber();
+            return parseNum();
         } else { // error
             throw new ParseError("Parse error: Expected '(', or number");
         }
     }
 
-    // Parse number from input
-    private static int parseNumber() {
+    private static int parseNum() {
         if (!isDigit()) { // error
             throw new ParseError("Parse error: Expected number");
         }
 
         int number = 0;
-
-        while (isDigit()) {
-            number = number * 10 + (consume() - '0');
-        }
+        while (isDigit()) number = number * 10 + (consume() - '0');
 
         return number;
     }
 
+    // Check if the current character is a digit
     private static boolean isDigit() {
-        return index < input.length() && Character.isDigit(current());
+        return !isEnd() && Character.isDigit(current());
     }
 
     // Return the current character in input without consuming it
     private static char current() {
-        if (index >= input.length()) {
+        if (isEnd()) {
             throw new ParseError("Parse error: Unexpected end of input");
         }
 
@@ -109,7 +106,7 @@ public class Evaluator {
 
     // Consume the current character in input and move to the next one
     private static char consume() {
-        if (index >= input.length()) {
+        if (isEnd()) {
             throw new ParseError("Parse error: Unexpected end of input");
         }
 
@@ -118,7 +115,7 @@ public class Evaluator {
 
     // Check if c is equal to next char in input & not out of bounds
     private static boolean equal(char c) {
-        if (index < input.length() && input.charAt(index) == c) {
+        if (!isEnd() && input.charAt(index) == c) {
             index++;
             return true;
         } else {
@@ -126,6 +123,7 @@ public class Evaluator {
         }
     }
 
+    // Check if the input has been fully consumed
     private static boolean isEnd() {
         return index >= input.length();
     }
