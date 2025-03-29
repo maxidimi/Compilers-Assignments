@@ -1,62 +1,40 @@
-import java.io.*;
-
-public class parser {
+public class Evaluator {
     private static String input;
 
     private static int index = 0;
 
-    public static void main(String[] args) throws IOException {
-        System.out.println("Enter an expression to evaluate (or 'q' to quit):");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        while ((input = reader.readLine()) != null) {
-            // Reset index on each new input/line
-            index = 0;
+    public static int evaluate(String expression) {
 
-            // Error if input is empty
-            if (input.length() == 0) {
-                System.out.println("Syntax error: Empty input");
-                continue;
-            }
-
-            // If input is "q" then exit
-            if (input.equals("q")) {
-                System.out.println("Exit");
-                break;
-            }
-
-            // Error if input differs than '+', '-', '**' , '(', ')', numbers or whitespaces
-            if (!input.matches("[0-9\\+\\-\\*\\s\\(\\)]+")) {
-                System.err.println("Syntax error: Invalid characters");
-                continue;
-            }
-
-            // Prevent "11 11" to "1111" after removing spaces
-            if (input.matches(".*\\d\\s+\\d.*")) {
-                System.err.println("Parse error: Invalid input format");
-                continue;
-            }
-
-            // Remove all spaces from input
-            input = input.replaceAll("\\s", "");
-
-            // If input is empty after removing spaces
-            if (input.length() == 0) {
-                System.err.println("Parse error: Empty input/only spaces provided");
-                continue;
-            }
-
-            try { // Evaluate the expression
-                int result = parseExp();
-                if (index < input.length()) {
-                    throw new RuntimeException("Parse error: Not all input consumed");
-                }
-                System.out.println("Result: " + result);
-            } catch (RuntimeException e) {
-                System.err.println("Parse error: " + e.getMessage());
-            } finally {
-                
-            }
+        // Error if input is empty
+        if (input.isEmpty()) {
+            throw new ParseError("Parse error: Empty input");
         }
+
+        // Error if input differs than '+', '-', '**' , '(', ')', numbers or whitespaces
+        if (!input.matches("[0-9\\+\\-\\*\\(\\)]+")) {
+            throw new ParseError("Syntax error: Invalid characters");
+        }
+
+        // Prevent "11 11" to "1111" after removing spaces
+        if (input.matches(".*\\d\\s+\\d.*")) {
+            throw new ParseError("Parse error: Invalid input format");
+        }
+
+        // Remove all spaces from input
+        input = input.replaceAll("\\s", "");
+
+        // If input is empty after removing spaces
+        if (input.length() == 0) {
+            throw new ParseError("Parse error: Empty input/only spaces provided");
+        }
+
+        int result = parseExp();
+
+        if (index < input.length()) {
+            throw new ParseError("Parse error: Not all input consumed");
+        }
+
+        return result;
     }
 
     private static int parseExp() {
@@ -99,7 +77,7 @@ public class parser {
     }
 
     private static int parseFactor() {
-        if (equal('(')) { //( exp )
+        if (equal('(')) { // ( exp )
             int result = parseExp();
 
             if (!equal(')')) {
@@ -112,7 +90,6 @@ public class parser {
         }
     }
 
-    // Parse number from input
     private static int parseNumber() {
         if (!isDigit()) {
             throw new RuntimeException("Parse error: Expected number");
