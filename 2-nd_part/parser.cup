@@ -1,43 +1,52 @@
-/* Simple +/-/* expression language; parser evaluates constant expressions on the fly*/
-/**
- *  Package and Import Specifications
- */
 import java_cup.runtime.*;
 
-/**
- *  Usercode Components
- */
+/* Parser Definition */
 parser code {:
-    // Connect this parser to a scanner!
+    // Connect this parser to a scanner
     Scanner s;
-    Parser(Scanner s){ this.s=s; }
+    Parser(Scanner s) { this.s = s; }
 :}
 
-/* define how to connect to the scanner! */
+/* Connect the scanner */
 scan with {: return s.next_token(); :};
 
-/**
- *  Symbol Lists
- */
+/* Terminals (tokens returned by the scanner) */
+terminal CONCAT, LPAREN, RPAREN, LBRAC, RBRAC, COMMA, PREFIX, SUFFIX, REVERSE, IF, ELSE, IDENTIFIER;
+terminal String STRING_LITERAL;
 
-/* Terminals (tokens returned by the scanner). */
-terminal            SEMI, LPAREN, RPAREN, LBRAC, RBRAC, CONCAT, PREFIX, SUFFIX, REVERSE, IF, ELSE, IDENTIFIER;
-terminal String     STRING_LITERAL;        // our scanner supports string literals
+/* Non-terminals */
+non terminal S, Statements, Statement, ArgumentList, Argument, FuncDef, Expression, Args;
 
-/*  Non terminals */
-non terminal            expr_list;
-non terminal Integer    expr;      // used to store evaluated subexpressions
-
-/**
- *  Precedence Declarations
- */
-precedence left REVERSE;
-precedence left CONCAT;
+/* Precedence (if needed) */
 precedence left IF;
+precedence left CONCAT;
+precedence left REVERSE;
 
-/**
- *  The Grammar Rules
- */
-expr_list ::= expr_list expr:e SEMI         {: System.out.println(e);         :}
-            | expr:e SEMI                  {: System.out.println(e);         :}
-            ;
+/* Grammar Rules */
+S ::= Statements
+    ;
+
+Statements ::= Statement                                    {: System.out.println("public static void main(String[] args){\n\n}\n"); :}
+              ;
+
+Statement ::= FuncDef
+              ;
+
+FuncDef ::= IDENTIFIER:id LPAREN ArgumentList:args RPAREN LBRAC Expression RBRAC 
+           {: System.out.println("public static void " + id + "(" + args + ") {\n\n}\n"); :}
+          ;
+
+ArgumentList ::= Argument Args
+                |
+                ;
+
+Args ::= COMMA Argument Args
+        | 
+        ;
+
+Argument ::= IDENTIFIER
+          ;
+
+Expression ::= IDENTIFIER CONCAT Expression
+              | 
+             ;
