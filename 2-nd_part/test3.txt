@@ -1,1 +1,9 @@
-check(a){}
+use(a) {
+
+}
+
+check(b) {
+
+}
+
+use(a)

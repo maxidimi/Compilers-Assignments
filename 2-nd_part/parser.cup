@@ -15,7 +15,7 @@ terminal CONCAT, LPAREN, RPAREN, LBRAC, RBRAC, COMMA, PREFIX, SUFFIX, REVERSE, I
 terminal String STRING_LITERAL;
 
 /* Non-terminals */
-non terminal S, Statements, Statement, ArgumentList, Argument, FuncDef, Expression, Args;
+non terminal S, Statements, Statement, ArgumentList, Argument, FuncDef, Expression, ArgsDef, FuncCall;
 
 /* Precedence (if needed) */
 precedence left IF;
@@ -26,27 +26,45 @@ precedence left REVERSE;
 S ::= Statements
     ;
 
-Statements ::= Statement                                    {: System.out.println("public static void main(String[] args){\n\n}\n"); :}
+Statements ::= Statement
+            |
               ;
 
-Statement ::= FuncDef
+Statement ::= FuncDef:func Statements
+              {: System.out.println(func); :}
+            |  FuncCall:func Statements
+              {: System.out.println(func); :}
               ;
 
-FuncDef ::= IDENTIFIER:id LPAREN ArgumentList:args RPAREN LBRAC Expression RBRAC 
-           {: System.out.println("public static void " + id + "(" + args + ") {\n\n}\n"); :}
+FuncDef ::= IDENTIFIER:id LPAREN ArgsDef:args RPAREN LBRAC Expression RBRAC 
+           {: RESULT = "public static String " + id + "(" + args + ") {\n\n}\n"; :}
           ;
 
-ArgumentList ::= Argument Args
+ArgsDef ::= IDENTIFIER:id
+             {: RESULT = id; :}
+           |  ArgsDef:args COMMA IDENTIFIER:id
+             {: RESULT = args + ", " + id; :}
+           ;
+
+FuncCall ::= IDENTIFIER:id LPAREN ArgumentList:args RPAREN
+           {: RESULT = id + "(" + args + ")"; :}
+          ;
+          
+ArgumentList ::= IDENTIFIER:id ArgumentList:args
+                {: RESULT = id; :}
+                | ArgumentList:args COMMA IDENTIFIER:id
+                {: RESULT = args + ", " + id; :}
+                | STRING_LITERAL:str
+                {: RESULT = str; :}
+                | ArgumentList:args COMMA STRING_LITERAL:str
+                {: RESULT = args + ", " + str; :}
+                | STRING_LITERAL:str ArgumentList:args
+                {: RESULT = str + ", " + args; :}
                 |
                 ;
 
-Args ::= COMMA Argument Args
-        | 
-        ;
-
-Argument ::= IDENTIFIER
-          ;
-
 Expression ::= IDENTIFIER CONCAT Expression
-              | 
+                
+              |
+
              ;
