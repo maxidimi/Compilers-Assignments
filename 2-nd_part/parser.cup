@@ -15,7 +15,8 @@ terminal CONCAT, LPAREN, RPAREN, LBRAC, RBRAC, COMMA, PREFIX, SUFFIX, REVERSE, I
 terminal String STRING_LITERAL;
 
 /* Non-terminals */
-non terminal S, Statements, Statement, ArgumentList, Argument, FuncDef, Expression, ArgsDef, FuncCall;
+non terminal S, Statements, Statement, FuncDefMain, FuncCallMain, FuncCallInner, ArgsFuncCallMain, ArgsFuncCallInner, ArgsFuncDef;
+non terminal ArgsFuncDef1, FuncDef, FuncExpr;
 
 /* Precedence (if needed) */
 precedence left IF;
@@ -23,48 +24,50 @@ precedence left CONCAT;
 precedence left REVERSE;
 
 /* Grammar Rules */
-S ::= Statements
+S ::= FuncDefMain:funcDefMain
+        {: RESULT = funcDefMain; :}
+    | FuncCallMain:funcCallMain
+        {: RESULT = funcCallMain; :}
+    | FuncCallInner:funcCallInner
+        {: RESULT = funcCallInner; :}
     ;
 
-Statements ::= Statement
+
+/* Function Call */
+ArgsFuncCallMain ::= STRING_LITERAL:str ArgsFuncCallMain
+                {: RESULT = str; :}
+              ;
+
+FuncCallMain ::= IDENTIFIER:func LPAREN ArgsFuncCallMain:args RPAREN
+                {: RESULT = "public static String " + func + "(" + args + ") {"; :}
+              ;
+
+ArgsFuncCallInner ::= STRING_LITERAL:str ArgsFuncCallInner
+                {: RESULT = str; :}
+            | IDENTIFIER:id ArgsFuncCallInner
+                {: RESULT = id; :}
             |
               ;
+FuncCallInner ::= IDENTIFIER:func LPAREN ArgsFuncCallInner:args RPAREN
+                {: RESULT = "public static String " + func + "(" + args + ") {"; :}
+            ;
 
-Statement ::= FuncDef:func Statements
-              {: System.out.println(func); :}
-            |  FuncCall:func Statements
-              {: System.out.println(func); :}
-              ;
-
-FuncDef ::= IDENTIFIER:id LPAREN ArgsDef:args RPAREN LBRAC Expression RBRAC 
-           {: RESULT = "public static String " + id + "(" + args + ") {\n\n}\n"; :}
-          ;
-
-ArgsDef ::= IDENTIFIER:id
-             {: RESULT = id; :}
-           |  ArgsDef:args COMMA IDENTIFIER:id
-             {: RESULT = args + ", " + id; :}
-           ;
-
-FuncCall ::= IDENTIFIER:id LPAREN ArgumentList:args RPAREN
-           {: RESULT = id + "(" + args + ")"; :}
-          ;
-          
-ArgumentList ::= IDENTIFIER:id ArgumentList:args
+/* Function Definition */
+ArgsFuncDef ::= IDENTIFIER:id ArgsFuncDef1
                 {: RESULT = id; :}
-                | ArgumentList:args COMMA IDENTIFIER:id
-                {: RESULT = args + ", " + id; :}
-                | STRING_LITERAL:str
-                {: RESULT = str; :}
-                | ArgumentList:args COMMA STRING_LITERAL:str
-                {: RESULT = args + ", " + str; :}
-                | STRING_LITERAL:str ArgumentList:args
-                {: RESULT = str + ", " + args; :}
-                |
                 ;
 
-Expression ::= IDENTIFIER CONCAT Expression
-                
-              |
+ArgsFuncDef1 ::= COMMA IDENTIFIER:id ArgsFuncDef1
+                {: RESULT = ", " + id; :}
+                |
+                {: RESULT = ""; :}
+                ;
 
-             ;
+FuncDef ::= IDENTIFIER:func LPAREN ArgsFuncDef:args RPAREN LBRAC FuncExpr:expr RBRAC
+                {: RESULT = "public static String " + func + "(" + args + ") {" + expr + "}"; :}
+            ;
+
+FuncExpr ::= IDENTIFIER CONCAT STRING_LITERAL:str
+                {: RESULT = "return " + str + ";"; :}
+            |
+            ;
