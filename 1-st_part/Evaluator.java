@@ -3,7 +3,7 @@ public class Evaluator {
 
     private static int index;
 
-    public static int evaluate(String expression) {
+    public static int evaluate(String expression) throws ParseError {
         input = expression;
         index = 0;
 
@@ -16,7 +16,7 @@ public class Evaluator {
         return result;
     }
 
-    private static int parseExp() {
+    private static int parseExp() throws ParseError {
         if (current() != '(' && !isDigit()) { // error
             throw new ParseError("Parse error: Expected '(', or number");
         }
@@ -24,7 +24,7 @@ public class Evaluator {
         return parseExp2(result);
     }
 
-    private static int parseExp2(int term) {
+    private static int parseExp2(int term) throws ParseError {
         if (equal('+')) {
             int parseTerm = parseTerm();
 
@@ -40,7 +40,7 @@ public class Evaluator {
         }
     }
 
-    private static int parseTerm() {
+    private static int parseTerm() throws ParseError {
         if (current() != '(' && !isDigit()) { // error
             throw new ParseError("Parse error: Expected '(', or number");
         }
@@ -48,7 +48,7 @@ public class Evaluator {
         return parseTerm2(result);
     }
 
-    private static int parseTerm2(int factor) {
+    private static int parseTerm2(int factor) throws ParseError {
         if (equal('*')) {
             if (!equal('*')) {
                 throw new ParseError("Parse error: Expected '**', found '*'");
@@ -65,7 +65,7 @@ public class Evaluator {
         }
     }
 
-    private static int parseFactor() {
+    private static int parseFactor() throws ParseError {
         if (equal('(')) { // ( exp )
             int result = parseExp();
             if (!equal(')')) {
@@ -79,7 +79,7 @@ public class Evaluator {
         }
     }
 
-    private static int parseNum() {
+    private static int parseNum() throws ParseError {
         if (!isDigit()) { // error
             throw new ParseError("Parse error: Expected number");
         }
@@ -91,12 +91,12 @@ public class Evaluator {
     }
 
     // Check if the current character is a digit
-    private static boolean isDigit() {
+    private static boolean isDigit() throws ParseError {
         return !isEnd() && Character.isDigit(current());
     }
 
     // Return the current character in input without consuming it
-    private static char current() {
+    private static char current() throws ParseError {
         if (isEnd()) {
             throw new ParseError("Parse error: Unexpected end of input");
         }
@@ -105,7 +105,7 @@ public class Evaluator {
     }
 
     // Consume the current character in input and move to the next one
-    private static char consume() {
+    private static char consume() throws ParseError {
         if (isEnd()) {
             throw new ParseError("Parse error: Unexpected end of input");
         }
