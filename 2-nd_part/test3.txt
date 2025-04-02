@@ -2,4 +2,15 @@ use(a,b) {
     a+"b"
 }
 
-use("a","c")
+tryie(d){
+    "c" + d
+}
+
+newtryie(f, ghf) {
+    f + ghf
+}
+
+newtryie("abde", "cde")
+
+use("a"+"bab","c")
+tryie("d")

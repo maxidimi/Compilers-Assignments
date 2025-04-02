@@ -17,3 +17,4 @@ clean:
 	rm -f Parser.java
 	rm -f sym.java
 	rm -f Scanner.java
+	rm -f Translated.java

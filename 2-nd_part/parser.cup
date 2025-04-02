@@ -11,11 +11,12 @@ parser code {:
 scan with {: return s.next_token(); :};
 
 /* Terminals (tokens returned by the scanner) */
-terminal CONCAT, LPAREN, RPAREN, LBRAC, RBRAC, COMMA, PREFIX, SUFFIX, REVERSE, IF, ELSE, IDENTIFIER;
+terminal CONCAT, LPAREN, RPAREN, LBRAC, RBRAC, COMMA, PREFIX, SUFFIX, REVERSE, IF, ELSE, IDENTIFIER, FUNCPARBRAC;
 terminal String STRING_LITERAL;
 
 /* Non-terminals */
-non terminal S, FuncDef, FuncCallMain, FuncExpr, ArgsFuncDef, ArgsFuncDef1, ArgsFuncCallMain, ArgsFuncCallMain1;
+non terminal S, FuncDef, FuncCallMain, FuncExpr, ArgsFuncDef, ArgsFuncDef1, ArgsFuncCallMain, ArgsFuncCallMain1,
+            FuncCallMain1, ConcatsDef, ConcatsMain;
 
 /* Precedence (if needed) */
 precedence left IF;
@@ -24,7 +25,7 @@ precedence left REVERSE;
 
 /* Grammar Rules */
 S ::= FuncDef:funcDef FuncCallMain:funcCallMain
-        {: System.out.println("class Translated {\n" + 
+        {: System.out.println("public class Translated {\n" + 
                             "\tpublic static void main(String[] args) {\n" + funcCallMain + "\n\t}\n"
                             + funcDef + "\n" +
                             "}\n"); :}
@@ -40,11 +41,20 @@ ArgsFuncCallMain ::= STRING_LITERAL:arg ArgsFuncCallMain1:args
 ArgsFuncCallMain1 ::= COMMA STRING_LITERAL:arg ArgsFuncCallMain1:args
             {: RESULT = ", \"" + arg + "\"" + args; :}
             |
+            CONCAT STRING_LITERAL:arg ArgsFuncCallMain1:args
+            {: RESULT = " + \"" + arg + "\"" + args; :}
+            |
             {: RESULT = ""; :}
             ;
 
-FuncCallMain ::= IDENTIFIER:func LPAREN ArgsFuncCallMain:args RPAREN
-                {: RESULT = "\t\t" + "System.out.println(" + func + "(" + args + "));"; :}
+FuncCallMain ::= IDENTIFIER:func LPAREN ArgsFuncCallMain:args RPAREN FuncCallMain1:funcCallMain
+                {: RESULT = "\t\t" + "System.out.println(" + func + "(" + args + "));" + funcCallMain; :}
+            ;
+
+FuncCallMain1 ::= FuncCallMain:funcCallMain
+                {: RESULT = "\n" + funcCallMain; :}
+            |
+            {: RESULT = ""; :}
             ;
 
 /* Function Definition */
@@ -60,12 +70,43 @@ ArgsFuncDef1 ::= COMMA IDENTIFIER:arg ArgsFuncDef1:args
             {: RESULT = ""; :}
             ;
 
-FuncDef ::= IDENTIFIER:func LPAREN ArgsFuncDef:args RPAREN LBRAC FuncExpr:expr RBRAC
+FuncDef ::= FuncDef:funcDef IDENTIFIER:func LPAREN ArgsFuncDef:args FUNCPARBRAC FuncExpr:expr RBRAC
+                {: RESULT = "\n\tpublic static String " + func +  "(" + args + ") {\n" + expr + "\n\t}" + funcDef; :}
+            |
+            IDENTIFIER:func LPAREN ArgsFuncDef:args FUNCPARBRAC FuncExpr:expr RBRAC
                 {: RESULT = "\n\tpublic static String " + func +  "(" + args + ") {\n" + expr + "\n\t}"; :}
             ;
 
-FuncExpr ::= IDENTIFIER:id CONCAT STRING_LITERAL:str
-                {: RESULT = "\t\treturn " + id + " + \"" + str + "\";"; :}
+/* Expressions in definitions */
+ConcatsDef ::= IDENTIFIER:var CONCAT IDENTIFIER:var1
+                {: RESULT = var + " + " + var1; :}
             |
-            {: RESULT = ""; :}
+            IDENTIFIER:var CONCAT STRING_LITERAL:literal
+                {: RESULT = var + " + \"" + literal + "\""; :}
+            |
+            STRING_LITERAL:literal CONCAT IDENTIFIER:var
+                {: RESULT = "\"" + literal + "\" + " + var; :}
+            |
+            STRING_LITERAL:literal CONCAT STRING_LITERAL:literal1
+                {: RESULT = "\"" + literal + "\" + \"" + literal1 + "\""; :}
+            |
+            CONCAT IDENTIFIER:var
+                {: RESULT = " + " + var; :}
+            |
+            CONCAT STRING_LITERAL:literal
+                {: RESULT = " + \"" + literal + "\""; :}
+            ;
+            
+FuncExpr ::= ConcatsDef:conc
+            {: RESULT = "\t\treturn " + conc + ";"; :}
+            | STRING_LITERAL:literal
+            {: RESULT = "\t\treturn \"" + literal + "\";"; :}
+            ;
+
+/* Expressions in function calls */
+ConcatsMain ::= ConcatsMain:conc CONCAT ConcatsDef:conc1
+                {: RESULT = conc + " + " + conc1; :}
+            |
+            ConcatsDef:conc
+                {: RESULT = conc; :}
             ;

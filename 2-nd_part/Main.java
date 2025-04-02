@@ -6,7 +6,6 @@ class Main {
         // Redirect stdout and stderr to Translated.java
         PrintStream out = new PrintStream(new FileOutputStream("Translated.java"));
         System.setOut(out);
-        System.setErr(out);
 
         Parser p = new Parser(new Scanner(new InputStreamReader(System.in)));
         p.parse();

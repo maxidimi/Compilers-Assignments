@@ -19,6 +19,7 @@ private Symbol symbol(int type, Object value) {
 LineTerminator = \r|\n|\r\n
 WhiteSpace     = {LineTerminator} | [ \t\f]
 Identifier = [a-zA-Z_$][a-zA-Z0-9_$]*
+FuncParBrac = ")"{WhiteSpace}* "{" // used to detect func def rather than func call
 
 %state STRING
 
@@ -41,6 +42,7 @@ Identifier = [a-zA-Z_$][a-zA-Z0-9_$]*
  \"             { stringBuffer.setLength(0); yybegin(STRING); }
  {WhiteSpace}   { /* just skip what was found, do nothing */ }
  {Identifier}   { return symbol(sym.IDENTIFIER, new String(yytext())); }
+ {FuncParBrac}  { return symbol(sym.FUNCPARBRAC, new String(yytext())); }
 }
 
 <STRING> {
