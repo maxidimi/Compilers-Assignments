@@ -1,9 +1,5 @@
-use(a) {
-
+use(a,b) {
+    a+"b"
 }
 
-check(b) {
-
-}
-
-use(a)
+use("a","c")
