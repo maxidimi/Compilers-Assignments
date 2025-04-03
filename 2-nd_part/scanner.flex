@@ -36,6 +36,7 @@ FuncParBrac = ")"{WhiteSpace}* "{" // used to detect func def rather than func c
  ","            { return symbol(sym.COMMA); }
  "prefix"       { return symbol(sym.PREFIX); }
  "suffix"       { return symbol(sym.SUFFIX); }
+ "="            { return symbol(sym.EQUAL); }
  "reverse"      { return symbol(sym.REVERSE); }
  "if"           { return symbol(sym.IF); }
  "else"         { return symbol(sym.ELSE); }
