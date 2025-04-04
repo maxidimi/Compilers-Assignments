@@ -1,5 +1,17 @@
-name()  {
-  
+name() {
+  "John"
 }
 
-name()
+repeat(x) {
+  x + x
+}
+
+cond_repeat(c, x) {
+  if ("?" suffix c)
+    c
+  else
+    x
+}
+
+cond_repeat("yes", name())
+cond_repeat("no?", "Jane")
