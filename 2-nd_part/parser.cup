@@ -11,12 +11,12 @@ parser code {:
 scan with {: return s.next_token(); :};
 
 /* Terminals (tokens returned by the scanner) */
-terminal CONCAT, LPAREN, RPAREN, LBRAC, RBRAC, COMMA, PREFIX, SUFFIX, REVERSE, IF, ELSE, IDENTIFIER, FUNCPARBRAC;
+terminal CONCAT, LPAREN, RPAREN, LBRAC, RBRAC, COMMA, PREFIX, SUFFIX, EQUAL, REVERSE, IF, ELSE, IDENTIFIER, FUNCPARBRAC;
 terminal String STRING_LITERAL;
 
 /* Non-terminals */
-non terminal S, FuncDef, FuncCallMain, FuncExpr, ArgsFuncDef, ArgsFuncDef1, ArgsFuncCallMain, ArgsFuncCallMain1,
-            FuncCallMain1, ConcatsDef, ConcatsMain;
+non terminal S, FuncDef, FuncCallMain, ArgsFuncDef, ArgsFuncDef1, ArgsFuncCallMain, ArgsFuncCallMain1, ExpInDef, ExpInMain,
+                IfElse, IfLog, IfElseBlock;
 
 /* Precedence (if needed) */
 precedence left IF;
@@ -28,85 +28,58 @@ S ::= FuncDef:funcDef FuncCallMain:funcCallMain
         {: System.out.println("public class Translated {\n" + 
                             "\tpublic static void main(String[] args) {\n" + funcCallMain + "\n\t}\n"
                             + funcDef + "\n" +
-                            "}\n"); :}
+                            "}"); :}
     ;
 
-/* Function Call */
-ArgsFuncCallMain ::= STRING_LITERAL:arg ArgsFuncCallMain1:args
-            {: RESULT = "\"" + arg + "\"" + args; :}
-            |
-            {: RESULT = ""; :}
-            ;
+/* If-Else statement */
+IfElse ::= IF LPAREN IfLog:ifLog RPAREN LBRAC ExpInDef:ifBlock RBRAC ELSE LBRAC ExpInDef:elseBlock RBRAC
+            {: RESULT = "if (" + ifLog + ") {\n" + ifBlock + "\n} else {\n" + elseBlock + "\n}"; :}
+;
 
-ArgsFuncCallMain1 ::= COMMA STRING_LITERAL:arg ArgsFuncCallMain1:args
-            {: RESULT = ", \"" + arg + "\"" + args; :}
-            |
-            CONCAT STRING_LITERAL:arg ArgsFuncCallMain1:args
-            {: RESULT = " + \"" + arg + "\"" + args; :}
-            |
-            {: RESULT = ""; :}
-            ;
+IfLog ::= ExpInDef:exp1 EQUAL ExpInDef:exp2
+            {: RESULT = exp1 + " == " + exp2; :}
+        | ExpInDef:exp1 PREFIX ExpInDef:exp2
+            {: RESULT = exp2 + ".startsWith(" + exp1 + ")"; :}
+        | ExpInDef:exp1 SUFFIX ExpInDef:exp2
+            {: RESULT = exp2 + ".endsWith(" + exp1 + ")"; :}
+        ;
 
-FuncCallMain ::= IDENTIFIER:func LPAREN ArgsFuncCallMain:args RPAREN FuncCallMain1:funcCallMain
+/* Function Call in main */
+ArgsFuncCallMain ::= ExpInMain:arg ArgsFuncCallMain1:args {: RESULT = "\"" + arg + "\"" + args; :}
+                   |                                      {: RESULT = ""; :}
+;
+
+ArgsFuncCallMain1 ::= COMMA ExpInMain:arg ArgsFuncCallMain1:args {: RESULT = ", \"" + arg + "\"" + args; :}
+                    |                                            {: RESULT = ""; :}
+;
+
+FuncCallMain ::= IDENTIFIER:func LPAREN ArgsFuncCallMain:args RPAREN FuncCallMain:funcCallMain
                 {: RESULT = "\t\t" + "System.out.println(" + func + "(" + args + "));" + funcCallMain; :}
-            ;
-
-FuncCallMain1 ::= FuncCallMain:funcCallMain
-                {: RESULT = "\n" + funcCallMain; :}
-            |
-            {: RESULT = ""; :}
-            ;
+                | {: RESULT = ""; :}
+;
 
 /* Function Definition */
-ArgsFuncDef ::= IDENTIFIER:arg ArgsFuncDef1:args
-            {: RESULT = "String " + arg + args; :}
-            |
-            {: RESULT = "void"; :}
-            ;
+ArgsFuncDef ::= IDENTIFIER:arg ArgsFuncDef1:args {: RESULT = "String " + arg + args; :}
+              |                                  {: RESULT = ""; :}
+;
 
-ArgsFuncDef1 ::= COMMA IDENTIFIER:arg ArgsFuncDef1:args
-            {: RESULT = ", String " + arg + args; :}
-            |
-            {: RESULT = ""; :}
-            ;
+ArgsFuncDef1 ::= COMMA IDENTIFIER:arg ArgsFuncDef1:args {: RESULT = ", String " + arg + args; :}
+               |                                        {: RESULT = ""; :}
+;
 
-FuncDef ::= FuncDef:funcDef IDENTIFIER:func LPAREN ArgsFuncDef:args FUNCPARBRAC FuncExpr:expr RBRAC
+FuncDef ::= FuncDef:funcDef IDENTIFIER:func LPAREN ArgsFuncDef:args FUNCPARBRAC ExpInDef:expr RBRAC
                 {: RESULT = "\n\tpublic static String " + func +  "(" + args + ") {\n" + expr + "\n\t}" + funcDef; :}
             |
-            IDENTIFIER:func LPAREN ArgsFuncDef:args FUNCPARBRAC FuncExpr:expr RBRAC
+            IDENTIFIER:func LPAREN ArgsFuncDef:args FUNCPARBRAC ExpInDef:expr RBRAC
                 {: RESULT = "\n\tpublic static String " + func +  "(" + args + ") {\n" + expr + "\n\t}"; :}
             ;
 
-/* Expressions in definitions */
-ConcatsDef ::= IDENTIFIER:var CONCAT IDENTIFIER:var1
-                {: RESULT = var + " + " + var1; :}
+/* Expressions in function def block */
+ExpInDef ::= IF LPAREN ExpInDef:expr RPAREN LBRAC ExpInDef:ifBlock RBRAC ELSE LBRAC ExpInDef:elseBlock RBRAC
+            {: RESULT = "if (" + expr + ") {\n" + ifBlock + "\n} else {\n" + elseBlock + "\n}"; :}
             |
-            IDENTIFIER:var CONCAT STRING_LITERAL:literal
-                {: RESULT = var + " + \"" + literal + "\""; :}
+            IF LPAREN ExpInDef:expr RPAREN LBRAC ExpInDef:ifBlock RBRAC
+            {: RESULT = "if (" + expr + ") {\n" + ifBlock + "\n}"; :}
             |
-            STRING_LITERAL:literal CONCAT IDENTIFIER:var
-                {: RESULT = "\"" + literal + "\" + " + var; :}
-            |
-            STRING_LITERAL:literal CONCAT STRING_LITERAL:literal1
-                {: RESULT = "\"" + literal + "\" + \"" + literal1 + "\""; :}
-            |
-            CONCAT IDENTIFIER:var
-                {: RESULT = " + " + var; :}
-            |
-            CONCAT STRING_LITERAL:literal
-                {: RESULT = " + \"" + literal + "\""; :}
-            ;
-            
-FuncExpr ::= ConcatsDef:conc
-            {: RESULT = "\t\treturn " + conc + ";"; :}
-            | STRING_LITERAL:literal
-            {: RESULT = "\t\treturn \"" + literal + "\";"; :}
-            ;
-
-/* Expressions in function calls */
-ConcatsMain ::= ConcatsMain:conc CONCAT ConcatsDef:conc1
-                {: RESULT = conc + " + " + conc1; :}
-            |
-            ConcatsDef:conc
-                {: RESULT = conc; :}
+            {: RESULT = ""; :}
             ;

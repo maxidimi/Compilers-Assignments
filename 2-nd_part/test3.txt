@@ -1,16 +1,5 @@
-use(a,b) {
-    a+"b"
+name()  {
+  
 }
 
-tryie(d){
-    "c" + d
-}
-
-newtryie(f, ghf) {
-    f + ghf
-}
-
-newtryie("abde", "cde")
-
-use("a"+"bab","c")
-tryie("d")
+name()
