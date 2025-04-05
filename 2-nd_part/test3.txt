@@ -8,7 +8,10 @@ repeat(x) {
 
 cond_repeat(c, x) {
   if ("?" suffix c)
-    c
+    if (c = "yes")
+      repeat(x)
+    else
+      x
   else
     x
 }

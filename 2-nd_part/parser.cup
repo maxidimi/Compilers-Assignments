@@ -16,7 +16,7 @@ terminal String STRING_LITERAL;
 
 /* Non-terminals */
 non terminal S, FuncDef, FuncCallMain, ArgsFuncDef, ArgsFuncDef1, ArgsFuncCallMain, ArgsFuncCallMain1, ExpInDef, ExpInMain,
-                IfElse, IfLog, IfElseBlock, AccInDef, FuncCallMain1, FuncCallDef, ArgsFuncCallDef, ArgsFuncCallDef1, ExpInIf;
+                IfElse, IfLog, AccInDef, FuncCallMain1, FuncCallDef, ArgsFuncCallDef, ArgsFuncCallDef1;
 
 /* Precedence (if needed) */
 precedence left IF;
@@ -79,28 +79,23 @@ ArgsFuncCallDef1 ::= COMMA ExpInDef:arg ArgsFuncCallDef1:args  {: RESULT = ", " 
 ;
 
 // If-Else statement in function definitions
-IfElse ::= IF LPAREN IfLog:ifLog RPAREN ExpInIf:ifBlock ELSE ExpInIf:elseBlock
+IfElse ::= IF LPAREN IfLog:ifLog RPAREN ExpInDef:ifBlock ELSE ExpInDef:elseBlock
             {: RESULT = ifLog + " ? " + ifBlock + " : " + elseBlock; :}
 ;
 IfLog ::= AccInDef:exp1 EQUAL ExpInDef:exp2   {: RESULT = "\t" + exp1 + " == " + exp2; :}
         | ExpInDef:exp1 PREFIX ExpInDef:exp2  {: RESULT = "\t" + exp2 + ".startsWith(" + exp1 + ")"; :}
         | ExpInDef:exp1 SUFFIX ExpInDef:exp2  {: RESULT = "\t" + exp2 + ".endsWith(" + exp1 + ")"; :}
 ;
-ExpInIf ::= REVERSE ExpInIf:exp                {: RESULT = "new StringBuilder(" + exp + ").reverse().toString()"; :}
-            | ExpInIf:exp CONCAT ExpInIf:exp1  {: RESULT = exp + " + " + exp1; :}
-            | AccInDef:acc                       {: RESULT = acc; :}
-            | FuncCallMain1:funcCallMain         {: RESULT = funcCallMain; :}
-;
 
 // Expressions that can be used in function definitions (calls, identifiers or literals)
 AccInDef ::= STRING_LITERAL:str  {: RESULT = "\"" + str + "\""; :}
-            | IDENTIFIER:str     {: RESULT = str; :}
-            | IfElse:ifElse      {: RESULT = ifElse; :}
+           | IDENTIFIER:str      {: RESULT = str; :}
+           | IfElse:ifElse       {: RESULT = ifElse; :}
 ;
 
 // Operations between permitted expressions in function definitions
 ExpInDef ::= REVERSE ExpInDef:exp                {: RESULT = "new StringBuilder(" + exp + ").reverse().toString()"; :}
             | ExpInDef:exp CONCAT ExpInDef:exp1  {: RESULT = exp + " + " + exp1; :}
             | AccInDef:acc                       {: RESULT = acc; :}
-            | FuncCallMain1:funcCallMain         {: RESULT = funcCallMain; :}
+            | FuncCallDef:funcCallMain           {: RESULT = funcCallMain; :}
 ;
