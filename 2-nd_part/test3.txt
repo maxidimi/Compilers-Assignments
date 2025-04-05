@@ -1,20 +1,16 @@
-name() {
-  "John"
+name()  {
+   "John"
 }
 
-repeat(x) {
-  x + x
+surname() {
+   "Doe"
 }
 
-cond_repeat(c, x) {
-  if ("?" suffix c)
-    if (c = "yes")
-      repeat(x)
-    else
-      x
+tt(){
+  if ( "JohnDoe"=name() + surname() )
+    "Correct"
   else
-    x
+    "Incorrect"
 }
 
-cond_repeat("yes", name())
-cond_repeat("no?", "Jane")
+tt()

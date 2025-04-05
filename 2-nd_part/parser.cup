@@ -16,7 +16,8 @@ terminal String STRING_LITERAL;
 
 /* Non-terminals */
 non terminal S, FuncDef, FuncCallMain, ArgsFuncDef, ArgsFuncDef1, ArgsFuncCallMain, ArgsFuncCallMain1, ExpInDef, ExpInMain,
-                IfElse, IfLog, AccInDef, FuncCallMain1, FuncCallDef, ArgsFuncCallDef, ArgsFuncCallDef1;
+                IfElse, IfLog, AccInDef, FuncCallMain1, FuncCallDef, ArgsFuncCallDef, ArgsFuncCallDef1,
+                IfElseMain, IfLogMain, AccInMain;
 
 /* Precedence (if needed) */
 precedence left IF;
@@ -26,7 +27,7 @@ precedence left REVERSE;
 /******** Grammar Rules ********/
 S ::= FuncDef:funcDef FuncCallMain:funcCallMain
         {: System.out.println("public class Translated {\n" + 
-                            "\tpublic static void main(String[] args) {\n" + funcCallMain + "\n\t}"
+                            "\tpublic static void main(String[] args) {\n" + funcCallMain + "\t}"
                             + funcDef + "\n" +
                             "}"); :}
 ;
@@ -47,17 +48,32 @@ ArgsFuncCallMain1 ::= COMMA ExpInMain:arg ArgsFuncCallMain1:args  {: RESULT = ",
 FuncCallMain1 ::= IDENTIFIER:func LPAREN ArgsFuncCallMain:args RPAREN  {: RESULT = func + "(" + args + ")"; :}
 ;
 
+// If-else statement in main
+IfElseMain ::= IF LPAREN IfLog:ifLog RPAREN ExpInMain:ifBlock ELSE ExpInMain:elseBlock
+            {: RESULT = "("+ifLog + " ? " + ifBlock + " : " + elseBlock+")"; :}
+;
+IfLogMain ::= ExpInMain:exp1 EQUAL ExpInMain:exp2   {: RESULT = "(" + exp1 + ")" + ".equals(" + exp2 + ")"; :}
+            | ExpInMain:exp1 PREFIX ExpInMain:exp2  {: RESULT = exp2 + ".startsWith(" + exp1 + ")"; :}
+            | ExpInMain:exp1 SUFFIX ExpInMain:exp2  {: RESULT = exp2 + ".endsWith(" + exp1 + ")"; :}
+;
+
+// Expressions that can be used in main
+AccInMain ::= STRING_LITERAL:str  {: RESULT = "\"" + str + "\""; :}
+            | IfElse:ifElse       {: RESULT = ifElse; :}
+;
+
 // Expressions that can be used in main (calls or literals)
-ExpInMain ::= STRING_LITERAL:str          {: RESULT = "\"" + str + "\""; :}
-            | FuncCallMain1:funcCallMain  {: RESULT = funcCallMain; :}
-            //? add concat, reverse and if-else
+ExpInMain ::= REVERSE ExpInMain:exp                {: RESULT = "new StringBuilder(" + exp + ").reverse().toString()"; :}
+            | ExpInMain:exp CONCAT ExpInMain:exp1  {: RESULT = exp + " + " + exp1; :}
+            | AccInMain:acc                        {: RESULT = acc; :}
+            | FuncCallMain1:funcCallMain           {: RESULT = funcCallMain; :}
 ;
 
 /******** Function Definition ********/
 FuncDef ::= FuncDef:funcDef IDENTIFIER:func LPAREN ArgsFuncDef:args FUNCPARBRAC ExpInDef:exp RBRAC
-                {: RESULT = "\n\tpublic static String " + func +  "(" + args + ") {\n\t\treturn " + exp + ";\n\t}" + funcDef; :}
+                {: RESULT = "\n\n\tpublic static String " + func +  "(" + args + ") {\n\t\treturn " + exp + ";\n\t}" + funcDef; :}
           | IDENTIFIER:func LPAREN ArgsFuncDef:args FUNCPARBRAC ExpInDef:exp RBRAC
-                {: RESULT = "\n\tpublic static String " + func +  "(" + args + ") {\n\t\treturn " + exp + ";\n\t}"; :}
+                {: RESULT = "\n\n\tpublic static String " + func +  "(" + args + ") {\n\t\treturn " + exp + ";\n\t}"; :}
 ;
 
 ArgsFuncDef ::= IDENTIFIER:arg ArgsFuncDef1:args  {: RESULT = "String " + arg + args; :}
@@ -79,12 +95,11 @@ ArgsFuncCallDef1 ::= COMMA ExpInDef:arg ArgsFuncCallDef1:args  {: RESULT = ", " 
 ;
 
 // If-Else statement in function definitions
-IfElse ::= IF LPAREN IfLog:ifLog RPAREN ExpInDef:ifBlock ELSE ExpInDef:elseBlock
-            {: RESULT = ifLog + " ? " + ifBlock + " : " + elseBlock; :}
+IfElse ::= IF LPAREN IfLog:ifLog RPAREN ExpInDef:ifBlock ELSE ExpInDef:elseBlock {: RESULT = "("+ifLog + " ? " + ifBlock + " : " + elseBlock+")"; :}
 ;
-IfLog ::= AccInDef:exp1 EQUAL ExpInDef:exp2   {: RESULT = "\t" + exp1 + " == " + exp2; :}
-        | ExpInDef:exp1 PREFIX ExpInDef:exp2  {: RESULT = "\t" + exp2 + ".startsWith(" + exp1 + ")"; :}
-        | ExpInDef:exp1 SUFFIX ExpInDef:exp2  {: RESULT = "\t" + exp2 + ".endsWith(" + exp1 + ")"; :}
+IfLog ::= ExpInDef:exp1 EQUAL  ExpInDef:exp2  {: RESULT = "(" + exp1 + ")" + ".equals(" + exp2 + ")"; :}
+        | ExpInDef:exp1 PREFIX ExpInDef:exp2  {: RESULT = exp2 + ".startsWith(" + exp1 + ")"; :}
+        | ExpInDef:exp1 SUFFIX ExpInDef:exp2  {: RESULT = exp2 + ".endsWith(" + exp1 + ")"; :}
 ;
 
 // Expressions that can be used in function definitions (calls, identifiers or literals)
