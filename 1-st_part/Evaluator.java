@@ -68,9 +68,6 @@ public class Evaluator {
     private static int parseFactor() throws ParseError {
         if (equal('(')) { // ( exp )
             int result = parseExp();
-            if (!equal(')')) {
-                throw new ParseError("Parse error: Expected ')'");
-            }
             return result;
         } else if (isDigit()) { // num
             return parseNum();
@@ -87,16 +84,22 @@ public class Evaluator {
         int number = 0;
         while (isDigit()) number = number * 10 + (consume() - '0');
 
+        skipWhitespace();
+        if ((index < input.length()) && isDigit()) { // error (not approve "1 1" as "11")
+            throw new ParseError("Parse error: Not approved format");
+        }
+
         return number;
     }
 
     // Check if the current character is a digit
     private static boolean isDigit() throws ParseError {
-        return !isEnd() && Character.isDigit(current());
+        return Character.isDigit(isEnd() ? '\0' : input.charAt(index));
     }
 
     // Return the current character in input without consuming it
     private static char current() throws ParseError {
+        skipWhitespace();
         if (isEnd()) {
             throw new ParseError("Parse error: Unexpected end of input");
         }
@@ -106,6 +109,7 @@ public class Evaluator {
 
     // Consume the current character in input and move to the next one
     private static char consume() throws ParseError {
+        skipWhitespace();
         if (isEnd()) {
             throw new ParseError("Parse error: Unexpected end of input");
         }
@@ -120,6 +124,13 @@ public class Evaluator {
             return true;
         } else {
             return false;
+        }
+    }
+
+    // Skip whitespace characters in input
+    private static void skipWhitespace() throws ParseError {
+        while (!isEnd() && Character.isWhitespace(input.charAt(index))) {
+            index++;
         }
     }
 
