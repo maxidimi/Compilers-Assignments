@@ -16,8 +16,7 @@ terminal String STRING_LITERAL;
 
 /* Non-terminals */
 non terminal S, FuncDef, FuncCallMain, ArgsFuncDef, ArgsFuncDef1, ArgsFuncCallMain, ArgsFuncCallMain1, ExpInDef, ExpInMain,
-                IfElse, IfLog, AccInDef, FuncCallMain1, FuncCallDef, ArgsFuncCallDef, ArgsFuncCallDef1,
-                IfElseMain, IfLogMain, AccInMain, MainCalls;
+                IfElse, IfLog, AccInDef, FuncCallDef, ArgsFuncCallDef, ArgsFuncCallDef1, IfElseMain, IfLogMain, AccInMain, MainCalls;
 
 /* Precedence */
 precedence left IF;
@@ -26,11 +25,11 @@ precedence left REVERSE;
 
 /******** Grammar Rules ********/
 S ::= FuncDef:funcDef MainCalls:callsMain
-        {: System.out.println("public class Translated {\n" + "\tpublic static void main(String[] args) {\n" + callsMain + "\t}" + funcDef + "\n" + "}"); :}
+        {: System.out.println("public class Translated {\n\tpublic static void main(String[] args) {\n" + callsMain + "\t}" + funcDef + "\n}"); :}
 ;
 
-/******** Function Call in main ********/
-FuncCallMain ::= IDENTIFIER:func LPAREN ArgsFuncCallMain:args RPAREN  {: RESULT = "\t\tSystem.out.println(" + func + "(" + args + "));\n"; :}
+/******** Expressions in main ********/
+FuncCallMain ::= IDENTIFIER:func LPAREN ArgsFuncCallMain:args RPAREN  {: RESULT = func + "(" + args + ")"; :}
 ;
 
 ArgsFuncCallMain ::= ExpInMain:arg ArgsFuncCallMain1:args  {: RESULT = "" +  arg + args; :}
@@ -40,12 +39,8 @@ ArgsFuncCallMain1 ::= COMMA ExpInMain:arg ArgsFuncCallMain1:args  {: RESULT = ",
                     |                                             {: RESULT = ""; :}
 ;
 
-// Used for calls as arguments in other function calls (don't print in main)
-FuncCallMain1 ::= IDENTIFIER:func LPAREN ArgsFuncCallMain:args RPAREN  {: RESULT = func + "(" + args + ")"; :}
-;
-
 // If-else statement in main
-IfElseMain ::= IF LPAREN IfLogMain:ifLog RPAREN ExpInMain:ifBlock ELSE ExpInMain:elseBlock {: RESULT = "("+ifLog + " ? " + ifBlock + " : " + elseBlock+")"; :}
+IfElseMain ::= IF LPAREN IfLogMain:ifLog RPAREN ExpInMain:ifBlock ELSE ExpInMain:elseBlock {: RESULT = "(" + ifLog + " ? " + ifBlock + " : " + elseBlock + ")"; :}
 ;
 IfLogMain ::= ExpInMain:exp1 EQUAL ExpInMain:exp2   {: RESULT = "(" + exp1 + ")" + ".equals(" + exp2 + ")"; :}
             | ExpInMain:exp1 PREFIX ExpInMain:exp2  {: RESULT = exp2 + ".startsWith(" + exp1 + ")"; :}
@@ -57,15 +52,16 @@ AccInMain ::= STRING_LITERAL:str  {: RESULT = "\"" + str + "\""; :}
             | IfElseMain:ifElse   {: RESULT = ifElse; :}
 ;
 
-// Expressions that can be used in main (calls or literals)
+// Operations between allowed expressions in main
 ExpInMain ::= REVERSE ExpInMain:exp                {: RESULT = "new StringBuilder(" + exp + ").reverse().toString()"; :}
             | ExpInMain:exp CONCAT ExpInMain:exp1  {: RESULT = exp + " + " + exp1; :}
             | AccInMain:acc                        {: RESULT = acc; :}
-            | FuncCallMain1:funcCallMain           {: RESULT = funcCallMain; :}
+            | FuncCallMain:funcCallMain            {: RESULT = funcCallMain; :}
 ;
 
-MainCalls ::= ExpInMain:exp1  MainCalls:mainCalls  {: RESULT = "\t\tSystem.out.println(" + exp1 + ");\n" + mainCalls; :}
-            |                                      {: RESULT = ""; :}
+// Print each command in main
+MainCalls ::= ExpInMain:exp1 MainCalls:mainCalls  {: RESULT = "\t\tSystem.out.println(" + exp1 + ");\n" + mainCalls; :}
+            |                                     {: RESULT = ""; :}
 ;
 
 /******** Function Definition ********/
@@ -80,7 +76,7 @@ ArgsFuncDef1 ::= COMMA IDENTIFIER:arg ArgsFuncDef1:args  {: RESULT = ", String "
                |                                         {: RESULT = ""; :}
 ;
 
-// Function calls in function definitions (don't print in main)
+// Function call in function definition (don't print in main)
 FuncCallDef ::= IDENTIFIER:func LPAREN ArgsFuncCallDef:args RPAREN  {: RESULT = func + "(" + args + ")"; :}
 ;
 
@@ -91,21 +87,21 @@ ArgsFuncCallDef1 ::= COMMA ExpInDef:arg ArgsFuncCallDef1:args  {: RESULT = ", " 
                    |                                           {: RESULT = ""; :}
 ;
 
-// If-Else statement in function definitions
-IfElse ::= IF LPAREN IfLog:ifLog RPAREN ExpInDef:ifBlock ELSE ExpInDef:elseBlock {: RESULT = "("+ifLog + " ? " + ifBlock + " : " + elseBlock+")"; :}
+// If-Else statement in function definition
+IfElse ::= IF LPAREN IfLog:ifLog RPAREN ExpInDef:ifBlock ELSE ExpInDef:elseBlock {: RESULT = "("+ ifLog + " ? " + ifBlock + " : " + elseBlock + ")"; :}
 ;
 IfLog ::= ExpInDef:exp1 EQUAL  ExpInDef:exp2  {: RESULT = "(" + exp1 + ")" + ".equals(" + exp2 + ")"; :}
         | ExpInDef:exp1 PREFIX ExpInDef:exp2  {: RESULT = exp2 + ".startsWith(" + exp1 + ")"; :}
         | ExpInDef:exp1 SUFFIX ExpInDef:exp2  {: RESULT = exp2 + ".endsWith(" + exp1 + ")"; :}
 ;
 
-// Expressions that can be used in function definitions (calls, identifiers or literals)
+// Expressions that can be used in function definition (calls, identifiers or literals)
 AccInDef ::= STRING_LITERAL:str  {: RESULT = "\"" + str + "\""; :}
            | IDENTIFIER:str      {: RESULT = str; :}
            | IfElse:ifElse       {: RESULT = ifElse; :}
 ;
 
-// Operations between permitted expressions in function definitions
+// Operations between allowed expressions in function definition
 ExpInDef ::= REVERSE ExpInDef:exp               {: RESULT = "new StringBuilder(" + exp + ").reverse().toString()"; :}
            | ExpInDef:exp CONCAT ExpInDef:exp1  {: RESULT = exp + " + " + exp1; :}
            | AccInDef:acc                       {: RESULT = acc; :}

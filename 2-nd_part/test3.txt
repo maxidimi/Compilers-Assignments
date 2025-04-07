@@ -1,5 +1,5 @@
 name()  {
-   "John"
+  "John"
 }
 
 surname() {
@@ -14,12 +14,25 @@ tt(){
 }
 
 testconc(a){
-  a
+  a + reverse reverse "result"
 }
 
 "tt()"
-testconc("A" + reverse "bcd" + "ecf")
+
+testconc(
+    if ( "John" prefix "Johnathan" )
+      "Correct name"
+    else
+      "Incorrect name"
+)
+
 if ( "a" = "John" )
   "Correct name"
 else
-  "Incorrect name"
+  name()
+
+"abc" + "def" + "ghi"
+
+reverse "abc" + "def" + "ghi"
+
+surname()
