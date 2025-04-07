@@ -3,7 +3,7 @@ name()  {
 }
 
 surname() {
-   "Doe"
+   "Doe" + reverse ""
 }
 
 tt(){
@@ -14,24 +14,24 @@ tt(){
 }
 
 testconc(a){
-  a + reverse reverse "result"
+  a + " " + reverse reverse "result"
 }
 
-"tt()"
+reverse " llac" + "tt()"
 
 testconc(
-    if ( "John" prefix "Johnathan" )
-      "Correct name"
+    if ( "than" suffix "Johnathan" )
+      "Correct"
     else
-      "Incorrect name"
+      "Incorrect"
 )
 
-if ( "a" = "John" )
-  "Correct name"
+if ( "John" = "John" )
+  "Sure you are here"
 else
   name()
 
-"abc" + "def" + "ghi"
+"abc" + "def" + reverse "ghi"
 
 reverse "abc" + "def" + "ghi"
 
