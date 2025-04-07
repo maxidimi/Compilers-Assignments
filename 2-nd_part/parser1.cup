@@ -41,9 +41,10 @@ ArgsFuncCallMain1 ::= COMMA ExpInMain:arg ArgsFuncCallMain1:args  {: RESULT = ",
 
 // If-else statement in main
 IfElseMain ::= IF LPAREN IfLogMain:ifLog RPAREN ExpInMain:ifBlock ELSE ExpInMain:elseBlock {: RESULT = "if (" + ifLog + ") \n\t\t" + ifBlock + "\n\t else \n\t\t" + elseBlock + "\n\t"; :}
+              | IF LPAREN ExpInMain:exp1 EQUAL ExpInMain:exp2 RPAREN ExpInMain:ifBlock ELSE ExpInMain:elseBlock 
+                    {: RESULT = "if (" + exp1 + " prefix " + exp2 + ") \n\t\t" + "if (" + exp2 + " prefix " + exp1 + ") \n\t" + ifBlock + "\n\t else \n\t\t" + elseBlock + "\n\t" + "else " + elseBlock; :}
 ;
-IfLogMain ::= ExpInMain:exp1 EQUAL ExpInMain:exp2   {: RESULT = "if (" + exp1 + " prefix " + exp2 + ")"; :}
-            | ExpInMain:exp1 PREFIX ExpInMain:exp2  {: RESULT = exp1 + " prefix " + exp2; :}
+IfLogMain ::= ExpInMain:exp1 PREFIX ExpInMain:exp2  {: RESULT = exp1 + " prefix " + exp2; :}
             | ExpInMain:exp1 SUFFIX ExpInMain:exp2  {: RESULT = "reverse " + exp1 + " prefix reverse " + exp2; :}
 ;
 
@@ -65,8 +66,8 @@ MainCalls ::= ExpInMain:exp1 MainCalls:mainCalls  {: RESULT = "" + exp1 + mainCa
 ;
 
 /******** Function Definition ********/
-FuncDef ::= FuncDef:funcDef IDENTIFIER:func LPAREN ArgsFuncDef:args FUNCPARBRAC ExpInDef:exp RBRAC  {: RESULT = funcDef + " " + func + "(" + args + ") {\n " + exp + "\n\t}"; :}
-          | IDENTIFIER:func LPAREN ArgsFuncDef:args FUNCPARBRAC ExpInDef:exp RBRAC                  {: RESULT = func + "(" + args + ") {\n " + exp + "\n\t}"; :}
+FuncDef ::= FuncDef:funcDef IDENTIFIER:func LPAREN ArgsFuncDef:args FUNCPARBRAC ExpInDef:exp RBRAC  {: RESULT = "" + funcDef + func + "(" + args + ") {\n " + exp + "\n}\n\n"; :}
+          | IDENTIFIER:func LPAREN ArgsFuncDef:args FUNCPARBRAC ExpInDef:exp RBRAC                  {: RESULT = func + "(" + args + ") {\n " + exp + "\n}\n\n"; :}
 ;
 
 ArgsFuncDef ::= IDENTIFIER:arg ArgsFuncDef1:args  {: RESULT = arg + "" + args; :}
@@ -89,9 +90,11 @@ ArgsFuncCallDef1 ::= COMMA ExpInDef:arg ArgsFuncCallDef1:args  {: RESULT = ", " 
 
 // If-Else statement in function definition
 IfElse ::= IF LPAREN IfLog:ifLog RPAREN ExpInDef:ifBlock ELSE ExpInDef:elseBlock {: RESULT = "if (" + ifLog + ") \n\t\t" + ifBlock + "\n\t else \n\t\t" + elseBlock + "\n\t"; :}
+         | IF LPAREN ExpInDef:exp1 EQUAL ExpInDef:exp2 RPAREN ExpInDef:ifBlock ELSE ExpInDef:elseBlock 
+                {: RESULT = "if (" + exp1 + " prefix " + exp2 + ") \n\t\t" + "if (" + exp2 + " prefix " + exp1 + ") \n\t" + ifBlock + "\n\t else \n\t\t" + elseBlock + "\n\t" + "else " + elseBlock; :}
 ;
-IfLog ::= ExpInDef:exp1 EQUAL  ExpInDef:exp2  {: RESULT = "if (" + exp1 + " prefix " + exp2 + ")"; :}
-        | ExpInDef:exp1 PREFIX ExpInDef:exp2  {: RESULT = exp1 + " prefix " + exp2; :}
+
+IfLog ::= ExpInDef:exp1 PREFIX ExpInDef:exp2  {: RESULT = exp1 + " prefix " + exp2; :}
         | ExpInDef:exp1 SUFFIX ExpInDef:exp2  {: RESULT = "reverse " + exp1 + " prefix reverse " + exp2; :}
 ;
 

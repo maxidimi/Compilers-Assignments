@@ -42,9 +42,7 @@ ArgsFuncCallMain1 ::= COMMA ExpInMain:arg ArgsFuncCallMain1:args  {: RESULT = ",
 // If-else statement in main
 IfElseMain ::= IF LPAREN IfLogMain:ifLog RPAREN ExpInMain:ifBlock ELSE ExpInMain:elseBlock {: RESULT = "(" + ifLog + " ? " + ifBlock + " : " + elseBlock + ")"; :}
 ;
-IfLogMain ::= ExpInMain:exp1 EQUAL ExpInMain:exp2   {: RESULT = "(" + exp1 + ")" + ".equals(" + exp2 + ")"; :}
-            | ExpInMain:exp1 PREFIX ExpInMain:exp2  {: RESULT = exp2 + ".startsWith(" + exp1 + ")"; :}
-            | ExpInMain:exp1 SUFFIX ExpInMain:exp2  {: RESULT = exp2 + ".endsWith(" + exp1 + ")"; :}
+IfLogMain ::= ExpInMain:exp1 PREFIX ExpInMain:exp2  {: RESULT = "(" + exp2 + ")" + ".startsWith(" + exp1 + ")"; :}
 ;
 
 // Expressions that can be used in main
@@ -90,9 +88,7 @@ ArgsFuncCallDef1 ::= COMMA ExpInDef:arg ArgsFuncCallDef1:args  {: RESULT = ", " 
 // If-Else statement in function definition
 IfElse ::= IF LPAREN IfLog:ifLog RPAREN ExpInDef:ifBlock ELSE ExpInDef:elseBlock {: RESULT = "("+ ifLog + " ? " + ifBlock + " : " + elseBlock + ")"; :}
 ;
-IfLog ::= ExpInDef:exp1 EQUAL  ExpInDef:exp2  {: RESULT = "(" + exp1 + ")" + ".equals(" + exp2 + ")"; :}
-        | ExpInDef:exp1 PREFIX ExpInDef:exp2  {: RESULT = exp2 + ".startsWith(" + exp1 + ")"; :}
-        | ExpInDef:exp1 SUFFIX ExpInDef:exp2  {: RESULT = exp2 + ".endsWith(" + exp1 + ")"; :}
+IfLog ::= ExpInDef:exp1 PREFIX ExpInDef:exp2  {: RESULT = "(" + exp2 + ")" + ".startsWith(" + exp1 + ")"; :}
 ;
 
 // Expressions that can be used in function definition (calls, identifiers or literals)

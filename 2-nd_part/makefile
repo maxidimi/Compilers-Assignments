@@ -19,3 +19,4 @@ clean:
 	rm -f sym.java
 	rm -f Scanner.java
 	rm -f Translated.java
+	rm -f Translated.ir
