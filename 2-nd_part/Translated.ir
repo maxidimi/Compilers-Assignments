@@ -1,0 +1,11 @@
+name() {
+ "John"
+	} repeat(x) {
+ x + x
+	} cond_repeat(c, x) {
+ if (if (c prefix x)) 
+		repeat(x)
+	 else 
+		c
+	
+	} cond_repeat("Jay", name())cond_repeat(name(), name())
