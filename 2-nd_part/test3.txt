@@ -13,4 +13,13 @@ tt(){
     "Incorrect"
 }
 
-tt()
+testconc(a){
+  a
+}
+
+"tt()"
+testconc("A" + reverse "bcd" + "ecf")
+if ( "a" = "John" )
+  "Correct name"
+else
+  "Incorrect name"

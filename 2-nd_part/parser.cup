@@ -17,21 +17,20 @@ terminal String STRING_LITERAL;
 /* Non-terminals */
 non terminal S, FuncDef, FuncCallMain, ArgsFuncDef, ArgsFuncDef1, ArgsFuncCallMain, ArgsFuncCallMain1, ExpInDef, ExpInMain,
                 IfElse, IfLog, AccInDef, FuncCallMain1, FuncCallDef, ArgsFuncCallDef, ArgsFuncCallDef1,
-                IfElseMain, IfLogMain, AccInMain, StartMain;
+                IfElseMain, IfLogMain, AccInMain, MainCalls;
 
-/* Precedence (if needed) */
+/* Precedence */
 precedence left IF;
 precedence left CONCAT;
 precedence left REVERSE;
 
 /******** Grammar Rules ********/
-S ::= FuncDef:funcDef FuncCallMain:callsMain
+S ::= FuncDef:funcDef MainCalls:callsMain
         {: System.out.println("public class Translated {\n" + "\tpublic static void main(String[] args) {\n" + callsMain + "\t}" + funcDef + "\n" + "}"); :}
 ;
 
 /******** Function Call in main ********/
-FuncCallMain ::= IDENTIFIER:func LPAREN ArgsFuncCallMain:args RPAREN FuncCallMain:funcCallMain  {: RESULT = "\t\t" + "System.out.println(" + func + "(" + args + "));\n" + funcCallMain; :}
-               |                                                                                {: RESULT = ""; :}
+FuncCallMain ::= IDENTIFIER:func LPAREN ArgsFuncCallMain:args RPAREN  {: RESULT = "\t\tSystem.out.println(" + func + "(" + args + "));\n"; :}
 ;
 
 ArgsFuncCallMain ::= ExpInMain:arg ArgsFuncCallMain1:args  {: RESULT = "" +  arg + args; :}
@@ -46,7 +45,7 @@ FuncCallMain1 ::= IDENTIFIER:func LPAREN ArgsFuncCallMain:args RPAREN  {: RESULT
 ;
 
 // If-else statement in main
-IfElseMain ::= IF LPAREN IfLog:ifLog RPAREN ExpInMain:ifBlock ELSE ExpInMain:elseBlock {: RESULT = "("+ifLog + " ? " + ifBlock + " : " + elseBlock+")"; :}
+IfElseMain ::= IF LPAREN IfLogMain:ifLog RPAREN ExpInMain:ifBlock ELSE ExpInMain:elseBlock {: RESULT = "("+ifLog + " ? " + ifBlock + " : " + elseBlock+")"; :}
 ;
 IfLogMain ::= ExpInMain:exp1 EQUAL ExpInMain:exp2   {: RESULT = "(" + exp1 + ")" + ".equals(" + exp2 + ")"; :}
             | ExpInMain:exp1 PREFIX ExpInMain:exp2  {: RESULT = exp2 + ".startsWith(" + exp1 + ")"; :}
@@ -55,7 +54,7 @@ IfLogMain ::= ExpInMain:exp1 EQUAL ExpInMain:exp2   {: RESULT = "(" + exp1 + ")"
 
 // Expressions that can be used in main
 AccInMain ::= STRING_LITERAL:str  {: RESULT = "\"" + str + "\""; :}
-            | IfElse:ifElse       {: RESULT = ifElse; :}
+            | IfElseMain:ifElse   {: RESULT = ifElse; :}
 ;
 
 // Expressions that can be used in main (calls or literals)
@@ -63,6 +62,10 @@ ExpInMain ::= REVERSE ExpInMain:exp                {: RESULT = "new StringBuilde
             | ExpInMain:exp CONCAT ExpInMain:exp1  {: RESULT = exp + " + " + exp1; :}
             | AccInMain:acc                        {: RESULT = acc; :}
             | FuncCallMain1:funcCallMain           {: RESULT = funcCallMain; :}
+;
+
+MainCalls ::= ExpInMain:exp1  MainCalls:mainCalls  {: RESULT = "\t\tSystem.out.println(" + exp1 + ");\n" + mainCalls; :}
+            |                                      {: RESULT = ""; :}
 ;
 
 /******** Function Definition ********/
