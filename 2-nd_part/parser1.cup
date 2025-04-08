@@ -45,7 +45,7 @@ IfElseMain ::= IF LPAREN IfLogMain:ifLog RPAREN ExpInMain:ifBlock ELSE ExpInMain
                     {: RESULT = "if (" + exp1 + " prefix " + exp2 + ") \n\t\t" + "if (" + exp2 + " prefix " + exp1 + ") \n\t" + ifBlock + "\n\t else \n\t\t" + elseBlock + "\n\t" + "else " + elseBlock; :}
 ;
 IfLogMain ::= ExpInMain:exp1 PREFIX ExpInMain:exp2  {: RESULT = exp1 + " prefix " + exp2; :}
-            | ExpInMain:exp1 SUFFIX ExpInMain:exp2  {: RESULT = "reverse " + exp1 + " prefix reverse " + exp2; :}
+            | ExpInMain:exp1 SUFFIX ExpInMain:exp2  {: RESULT = "reverse _EvalExpRev(" + exp1 + ") prefix reverse _EvalExpRev(" + exp2 + ")"; :}
 ;
 
 // Expressions that can be used in main
@@ -67,7 +67,7 @@ MainCalls ::= ExpInMain:exp1 MainCalls:mainCalls  {: RESULT = "" + exp1 + mainCa
 
 /******** Function Definition ********/
 FuncDef ::= FuncDef:funcDef IDENTIFIER:func LPAREN ArgsFuncDef:args FUNCPARBRAC ExpInDef:exp RBRAC  {: RESULT = "" + funcDef + func + "(" + args + ") {\n " + exp + "\n}\n\n"; :}
-          | IDENTIFIER:func LPAREN ArgsFuncDef:args FUNCPARBRAC ExpInDef:exp RBRAC                  {: RESULT = func + "(" + args + ") {\n " + exp + "\n}\n\n"; :}
+          | {: RESULT = ""; :}
 ;
 
 ArgsFuncDef ::= IDENTIFIER:arg ArgsFuncDef1:args  {: RESULT = arg + "" + args; :}
@@ -95,7 +95,7 @@ IfElse ::= IF LPAREN IfLog:ifLog RPAREN ExpInDef:ifBlock ELSE ExpInDef:elseBlock
 ;
 
 IfLog ::= ExpInDef:exp1 PREFIX ExpInDef:exp2  {: RESULT = exp1 + " prefix " + exp2; :}
-        | ExpInDef:exp1 SUFFIX ExpInDef:exp2  {: RESULT = "reverse " + exp1 + " prefix reverse " + exp2; :}
+        | ExpInDef:exp1 SUFFIX ExpInDef:exp2  {: RESULT = "reverse _EvalExpRev(" + exp1 + ") prefix reverse _EvalExpRev(" + exp2 + ")"; :}
 ;
 
 // Expressions that can be used in function definition (calls, identifiers or literals)

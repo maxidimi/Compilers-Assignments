@@ -25,7 +25,7 @@ precedence left REVERSE;
 
 /******** Grammar Rules ********/
 S ::= FuncDef:funcDef MainCalls:callsMain
-        {: System.out.println("public class Translated {\n\tpublic static void main(String[] args) {\n" + callsMain + "\t}" + funcDef + "\n}"); :}
+        {: System.out.println("public class Translated {\n\tpublic static void main(String[] args) {\n" + callsMain + "\t}\n\n\tpublic static String _EvalExpRev(String x) {\n\t\treturn x;\n\t}" + funcDef + "\n}"); :}
 ;
 
 /******** Expressions in main ********/
@@ -64,7 +64,7 @@ MainCalls ::= ExpInMain:exp1 MainCalls:mainCalls  {: RESULT = "\t\tSystem.out.pr
 
 /******** Function Definition ********/
 FuncDef ::= FuncDef:funcDef IDENTIFIER:func LPAREN ArgsFuncDef:args FUNCPARBRAC ExpInDef:exp RBRAC  {: RESULT = "\n\n\tpublic static String " + func +  "(" + args + ") {\n\t\treturn " + exp + ";\n\t}" + funcDef; :}
-          | IDENTIFIER:func LPAREN ArgsFuncDef:args FUNCPARBRAC ExpInDef:exp RBRAC                  {: RESULT = "\n\n\tpublic static String " + func +  "(" + args + ") {\n\t\treturn " + exp + ";\n\t}"; :}
+          | {: RESULT = ""; :}
 ;
 
 ArgsFuncDef ::= IDENTIFIER:arg ArgsFuncDef1:args  {: RESULT = "String " + arg + args; :}

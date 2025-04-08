@@ -1,0 +1,4 @@
+if ("Nodef" prefix "NodefHere")
+    "No definition is made, only expressions"
+else
+    "Not gonna be here!"

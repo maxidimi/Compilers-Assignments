@@ -1,0 +1,3 @@
+tryNoCall() {
+    "No calls here, only definitions"
+}
