@@ -25,6 +25,7 @@ public class Evaluator {
     }
 
     private static int parseExp2(int term) throws ParseError {
+        skipWhitespace();
         if (equal('+')) {
             int parseTerm = parseTerm();
 
@@ -53,6 +54,7 @@ public class Evaluator {
             if (!equal('*')) {
                 throw new ParseError("Parse error: Expected '**', found '*'");
             } else { // **
+                skipWhitespace();
                 int parseFactor = parseFactor();
 
                 // Calculate a**b**c as a**(b**c)
@@ -66,6 +68,7 @@ public class Evaluator {
     }
 
     private static int parseFactor() throws ParseError {
+        skipWhitespace();
         if (equal('(')) { // ( exp )
             int result = parseExp();
             return result;
@@ -84,7 +87,7 @@ public class Evaluator {
         int number = 0;
         while (isDigit()) number = number * 10 + (consume() - '0');
 
-        skipWhitespace();
+        skipWhitespace(); // Go to the next char (if any)
         if ((index < input.length()) && isDigit()) { // error (not approve "1 1" as "11")
             throw new ParseError("Parse error: Not approved format");
         }
