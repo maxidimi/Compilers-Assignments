@@ -62,8 +62,7 @@ for i in {1..11}; do
     echo "-------------------------"
 done
 
-echo "Tests completed."
-echo "Total passed tests: $passed/$((i-1))"
+echo -e "\nTotal passed tests: $passed/$((i))\n"
 
 echo "Cleaning up..."
 make clean
