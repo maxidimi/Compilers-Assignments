@@ -7,12 +7,12 @@ class VariableDec {
     // Variable type
     String type;
 
-    // Class that contains the variable
-    ClassDec classInto;
+    // Offset in the stack
+    int offset;
 
     VariableDec(String name, String type) {
-        this.classInto = null;
         this.name = name;
         this.type = type;
+        this.offset = -1; // Default value
     }
 }

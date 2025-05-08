@@ -33,6 +33,7 @@ public class Main {
                 });
 
                 //? Call another visitor to do the type checking
+                //VisitorCheck check = new VisitorCheck(symbolTable);
             }
             catch(ParseException ex){
                 System.out.println(ex.getMessage());

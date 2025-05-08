@@ -1,10 +1,13 @@
 import syntaxtree.*;
 import visitor.*;
 
-class VisitorST extends GJDepthFirst<String, Void>{
-    
+class VisitorCheck extends GJDepthFirst<String, Void>{
     // The symbol table
-    SymbolTable symbolTable = new SymbolTable();
+    SymbolTable symbolTable;
+
+    VisitorCheck(SymbolTable symbolTable) {
+        this.symbolTable = symbolTable;
+    }
 
     /**
      * f0 -> "class"
