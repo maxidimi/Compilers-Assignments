@@ -1,0 +1,8 @@
+Compilers HW2
+30/4
+
+- Shadowing,
+- On inheritance, in the offset table, we put first the items of the superclass,
+- In the table, we put both the variables with same name that both classes have, in case that we need it for an inherited function of superclass, warning: no super. is allowed.
+- In overriding between classes, in offset table, the same-named functions are different inputs,
+- super.foo == call A::foo
