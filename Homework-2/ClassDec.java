@@ -19,7 +19,7 @@ class ClassDec {
     // Total offset
     int offset;
 
-    ClassDec(String name, String parent) {
+    ClassDec(String name, String parent, int offset) {
         this.name = name;
         this.parent = parent;
         this.offset = 0;
@@ -32,15 +32,19 @@ class ClassDec {
     public String getName() {
         return name;
     }
+
     public String getParent() {
         return parent;
     }
+
     public int getOffset() {
         return offset;
     }
+
     public Map<String, VariableDec> getFields() {
         return fields;
     }
+
     public Map<String, MethodDec> getMethods() {
         return methods;
     }
@@ -49,12 +53,15 @@ class ClassDec {
     public void setName(String name) {
         this.name = name;
     }
+
     public void setParent(String parent) {
         this.parent = parent;
     }
+
     public void setOffset(int offset) {
         this.offset = offset;
     }
+
     public void setField(String name, String type) {
         // Check if the field already exists
         if (fields.containsKey(name)) {
@@ -74,14 +81,18 @@ class ClassDec {
             offset += 8; 
         }
     }
-    public void setMethod(String name, String type) {
+    
+    public void setMethod(MethodDec method) {
+        String methodName = method.getName();
+
         // Check if the method already exists
-        if (methods.containsKey(name)) {
-            System.err.println("Error: Method " + name + " already exists in class " + this.name);
+        if (methods.containsKey(methodName)) {
+            System.err.println("Error: Method " + methodName + " already exists in class " + this.name);
             return;
         }
         // Add a method to the class
-        methods.put(name, new MethodDec(name, type));
+        methods.put(methodName, method);
+        method.classInto = this; // Set the class that contains the method
 
         // Update the offset
         offset += 8;

@@ -4,11 +4,21 @@ Classes in the symbol table:
 			i --> int
 			a --> A
 		Methods: 
-			foo({}) --> int
-			bar({}) --> int
+			foo --> int
+				Arguments:
+					i == int
+					j == int
+			bar --> int
+				Arguments:
+		Offset: 12
 	Class: B (extends A)
 		Fields: 
-			i --> int
 		Methods: 
-			foo({}) --> int
-			foobar({}) --> int
+			foo --> int
+				Arguments:
+					i == int
+					j == int
+			foobar --> int
+				Arguments:
+					k == boolean
+		Offset: 12

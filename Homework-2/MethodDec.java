@@ -31,6 +31,15 @@ class MethodDec {
         this.arguments = new HashMap<>();
     }
 
+    // Setters
+    public void setClassInto(ClassDec classInto) {
+        this.classInto = classInto;
+    }
+    
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
+
     public void setArgument(String name, String type) {
         // Check if the argument already exists
         if (arguments.containsKey(name)) {
@@ -57,18 +66,23 @@ class MethodDec {
     public String getName() {
         return name;
     }
+
     public String getReturnType() {
         return returnType;
     }
+
     public ClassDec getClassInto() {
         return classInto;
     }
+
     public int getOffset() {
         return offset;
     }
+
     public Map<String, VariableDec> getArguments() {
         return arguments;
     }
+
     public Map<String, VariableDec> getVariables() {
         return variables;
     }

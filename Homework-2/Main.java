@@ -36,8 +36,15 @@ public class Main {
 
                     System.out.println("\t\tMethods: ");
                     for (String method : v.methods.keySet()) {
-                        System.out.println("\t\t\t" + method + "(" + v.methods.get(method).getArguments() + ") --> " + v.methods.get(method).returnType);
+                        System.out.println("\t\t\t" + method + " --> " + v.methods.get(method).returnType);
+
+                        System.out.println("\t\t\t\tArguments:");
+                        for (String arg : v.methods.get(method).arguments.keySet()) {
+                            System.out.println("\t\t\t\t\t" + arg + " == " + v.methods.get(method).arguments.get(arg).type);
+                        }
                     }
+
+                    System.out.println("\t\tOffset: " + v.offset);
                 });
 
                 //? Call another visitor to do the type checking
