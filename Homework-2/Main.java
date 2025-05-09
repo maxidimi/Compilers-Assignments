@@ -18,8 +18,6 @@ public class Main {
 
                 Goal root = parser.Goal();
 
-                System.err.println("Program parsed successfully.");
-
                 VisitorST eval = new VisitorST(); // Create a visitor to build Symbol Table
                 root.accept(eval, null);
 
@@ -28,8 +26,18 @@ public class Main {
                 // For each class in the symbol table print its name
                 System.out.println("Classes in the symbol table:");
                 symbolTable.classes.forEach((k, v) -> {
-                    System.out.println("\tClass: " + k);
-                    if(v.parent != null) System.out.println("\t\tParent: " + v.parent);
+
+                    System.out.println("\tClass: " + k + (v.parent != null ? " (extends " + v.parent + ")" : ""));
+
+                    System.out.println("\t\tFields: ");
+                    for (String field : v.fields.keySet()) {
+                        System.out.println("\t\t\t" + field + " --> " + v.fields.get(field).type);
+                    }
+
+                    System.out.println("\t\tMethods: ");
+                    for (String method : v.methods.keySet()) {
+                        System.out.println("\t\t\t" + method + "(" + v.methods.get(method).getArguments() + ") --> " + v.methods.get(method).returnType);
+                    }
                 });
 
                 //? Call another visitor to do the type checking

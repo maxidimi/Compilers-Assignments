@@ -31,7 +31,45 @@ class MethodDec {
         this.arguments = new HashMap<>();
     }
 
-    public void addArgument(String name, String type) {
+    public void setArgument(String name, String type) {
+        // Check if the argument already exists
+        if (arguments.containsKey(name)) {
+            System.err.println("Error: Argument " + name + " already exists in method " + this.name);
+            return;
+        }
+
+        // Add an argument to the method
         arguments.put(name, new VariableDec(name, type));
+    }
+
+    public void setVariable(String name, String type) {
+        // Check if the variable already exists
+        if (variables.containsKey(name)) {
+            System.err.println("Error: Variable " + name + " already exists in method " + this.name);
+            return;
+        }
+
+        // Add a variable to the method
+        variables.put(name, new VariableDec(name, type));
+    }
+
+    // Getters
+    public String getName() {
+        return name;
+    }
+    public String getReturnType() {
+        return returnType;
+    }
+    public ClassDec getClassInto() {
+        return classInto;
+    }
+    public int getOffset() {
+        return offset;
+    }
+    public Map<String, VariableDec> getArguments() {
+        return arguments;
+    }
+    public Map<String, VariableDec> getVariables() {
+        return variables;
     }
 }

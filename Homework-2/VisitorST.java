@@ -49,20 +49,21 @@ class VisitorST extends GJDepthFirst<String, Void>{
         
         // Classname
         String classname = n.f1.accept(this, argu);
+        // Add the class to the symbol table
+        ClassDec classDec = new ClassDec(classname, null);
+        symbolTable.classes.put(classname, classDec);
+        symbolTable.currentClass = classname;
 
         n.f2.accept(this, argu);
 
         // Fields
         n.f3.accept(this, argu);
+        symbolTable.currentMethod = null; // End of fields declarations
 
         // Methods
         n.f4.accept(this, argu);
 
         n.f5.accept(this, argu);
-
-        // Add the class to the symbol table
-        ClassDec classDec = new ClassDec(classname, null);
-        symbolTable.classes.put(classname, classDec);
 
         return null;
     }
@@ -89,19 +90,21 @@ class VisitorST extends GJDepthFirst<String, Void>{
         // Parent class
         String parent = n.f3.accept(this, argu);
 
+        // Add the class to the symbol table
+        ClassDec classDec = new ClassDec(classname, parent);
+        symbolTable.classes.put(classname, classDec);
+        symbolTable.currentClass = classname;
+
         n.f4.accept(this, argu);
 
         // Fields
         n.f5.accept(this, argu);
+        symbolTable.currentMethod = null; // End of fields declarations
 
         // Methods
         n.f6.accept(this, argu);
 
         n.f7.accept(this, argu);
-
-        // Add the class to the symbol table
-        ClassDec classDec = new ClassDec(classname, parent);
-        symbolTable.classes.put(classname, classDec);
 
         return null;
     }
@@ -123,6 +126,23 @@ class VisitorST extends GJDepthFirst<String, Void>{
         super.visit(n, argu);
 
         // Add the variable to the current class/scope
+        if (symbolTable.currentMethod != null) {
+            MethodDec methodDec = symbolTable.methods.get(symbolTable.currentMethod);
+            if (methodDec != null) {
+                methodDec.setVariable(var, type);
+            } else {
+                System.err.println("Error: Method not found in symbol table");
+            }
+        } else if (symbolTable.currentClass != null) {
+            ClassDec classDec = symbolTable.classes.get(symbolTable.currentClass);
+            if (classDec != null) {
+                classDec.setField(var, type);
+            } else {
+                System.err.println("Error: Class not found in symbol table");
+            }
+        } else {
+            System.err.println("Error: No class or method found in symbol table");
+        }
         
         return _ret;
     }
@@ -144,17 +164,56 @@ class VisitorST extends GJDepthFirst<String, Void>{
      */
     @Override
     public String visit(MethodDeclaration n, Void argu) throws Exception {
-        // Arguments list
-        String argumentList = n.f4.present() ? n.f4.accept(this, null) : "";
-
         // Type of the method
         String myType = n.f1.accept(this, null);
 
         // Name of the method
         String myName = n.f2.accept(this, null);
 
-        // Local variables
-        super.visit(n, argu);
+        // Add the method to the symbol table
+        MethodDec methodDec = new MethodDec(myName, myType);
+        symbolTable.methods.put(myName, methodDec);
+        symbolTable.currentMethod = myName;
+
+        n.f3.accept(this, argu);
+        
+        // Arguments list
+        String argumentList = n.f4.present() ? n.f4.accept(this, null) : "";
+        String[] args = argumentList.split(", ");
+        for (String arg : args) {
+            String[] parts = arg.split(" ");
+            if (parts.length == 2) {
+                String argType = parts[0];
+                String argName = parts[1];
+                methodDec.setArgument(argName, argType);
+            }
+        }
+
+        n.f5.accept(this, argu);
+        n.f6.accept(this, argu);
+
+        // Variables
+        n.f7.accept(this, argu);
+        symbolTable.currentMethod = null; // End of variables declarations
+
+        // Statements
+        n.f8.accept(this, argu);
+
+        n.f9.accept(this, argu);
+
+        // Return expression
+        n.f10.accept(this, argu);
+
+        n.f11.accept(this, argu);
+        n.f12.accept(this, argu);
+
+        // Add the method to the class
+        ClassDec classDec = symbolTable.classes.get(symbolTable.currentClass);
+        if (classDec != null) {
+            classDec.setMethod(myName, myType);
+        } else {
+            System.err.println("Error: Class not found in symbol table");
+        }
 
         return null;
     }

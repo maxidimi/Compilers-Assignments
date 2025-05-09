@@ -1,0 +1,14 @@
+Classes in the symbol table:
+	Class: A
+		Fields: 
+			i --> int
+			a --> A
+		Methods: 
+			foo({}) --> int
+			bar({}) --> int
+	Class: B (extends A)
+		Fields: 
+			i --> int
+		Methods: 
+			foo({}) --> int
+			foobar({}) --> int

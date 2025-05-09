@@ -15,4 +15,11 @@ class VariableDec {
         this.type = type;
         this.offset = -1; // Default value
     }
+
+    public String getOffset() {
+        return String.valueOf(offset);
+    }
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
 }

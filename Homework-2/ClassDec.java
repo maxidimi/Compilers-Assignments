@@ -16,24 +16,74 @@ class ClassDec {
     // Methods of the class - pointer to their MethodDec
     Map<String, MethodDec> methods;
 
-    // Offsets
+    // Total offset
     int offset;
 
     ClassDec(String name, String parent) {
         this.name = name;
         this.parent = parent;
+        this.offset = 0;
         // LinkedHashMap to keep insertion order
         this.fields = new LinkedHashMap<>();
         this.methods = new LinkedHashMap<>();
-        this.offset = -1; // Default value
     }
 
-    public void addField(String name, String type) {
-        //? Add a field to the class
+    // Getters
+    public String getName() {
+        return name;
+    }
+    public String getParent() {
+        return parent;
+    }
+    public int getOffset() {
+        return offset;
+    }
+    public Map<String, VariableDec> getFields() {
+        return fields;
+    }
+    public Map<String, MethodDec> getMethods() {
+        return methods;
     }
 
-    public void addMethod(String name, String type) {
-        //? Check if the method already exists
-        //? Add a method to the class
+    // Setters
+    public void setName(String name) {
+        this.name = name;
+    }
+    public void setParent(String parent) {
+        this.parent = parent;
+    }
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
+    public void setField(String name, String type) {
+        // Check if the field already exists
+        if (fields.containsKey(name)) {
+            System.err.println("Error: Field " + name + " already exists in class " + this.name);
+            return;
+        }
+        
+        // Add a field to the class
+        fields.put(name, new VariableDec(name, type));
+
+        // Update the offset
+        if (type.equals("int")) {
+            offset += 4;
+        } else if (type.equals("boolean")) {
+            offset += 1;
+        } else { // Array
+            offset += 8; 
+        }
+    }
+    public void setMethod(String name, String type) {
+        // Check if the method already exists
+        if (methods.containsKey(name)) {
+            System.err.println("Error: Method " + name + " already exists in class " + this.name);
+            return;
+        }
+        // Add a method to the class
+        methods.put(name, new MethodDec(name, type));
+
+        // Update the offset
+        offset += 8;
     }
 }
