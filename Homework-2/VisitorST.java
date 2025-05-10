@@ -57,7 +57,7 @@ class VisitorST extends GJDepthFirst<String, Void>{
         currentClass = classname;
 
         // Create class & add it to the symbol table
-        ClassDec classDec = new ClassDec(classname, null, 0);
+        ClassDec classDec = new ClassDec(classname, null, 0, 0);
         symbolTable.setClass(classname, classDec);
 
         n.f2.accept(this, argu);
@@ -99,16 +99,18 @@ class VisitorST extends GJDepthFirst<String, Void>{
         // Parent class
         String parent = n.f3.accept(this, argu);
 
-        // Add the class to the symbol table
-        ClassDec classDec = new ClassDec(classname, parent, 0);
+        // Create class & add it to the symbol table
+        ClassDec classDec = new ClassDec(classname, parent, 0, 0);
         symbolTable.setClass(classname, classDec);
 
         // Add parent's offset to the class
         ClassDec parentClass = symbolTable.getClass(parent);
         if (parentClass != null) {
-            classDec.offset = parentClass.offset;
+            classDec.varOffset = parentClass.varOffset;
+            classDec.methodOffset = parentClass.methodOffset;
         } else { // Parent class must always be defined before the child class
-            System.err.println("Error: Parent class " + parent + " not found in symbol table");
+            // Raise an exception
+            throw new Exception("Parent class " + parent + " not found in symbol table");
         }
         
         n.f4.accept(this, argu);
@@ -148,21 +150,21 @@ class VisitorST extends GJDepthFirst<String, Void>{
             if (methodDec != null) {
                 methodDec.setVariable(var, type);
             } else {
-                System.err.println("Error: Method not found in symbol table");
+                new Exception("Method " + currentMethod + " not found in symbol table, class " + currentClass);
             }
         } else if (currentMethod != null) { // Add as a field to the current class
             MethodDec methodDec = symbolTable.getMethod(currentMethod);
             if (methodDec != null) {
                 methodDec.setVariable(var, type);
             } else {
-                System.err.println("Error: Method not found in symbol table");
+                new Exception("Method " + currentMethod + " not found in symbol table, class " + currentClass);
             }
         } else { // Add as a field to the current class
             ClassDec classDec = symbolTable.getClass(currentClass);
             if (classDec != null) {
                 classDec.setField(var, type);
             } else {
-                System.err.println("Error: Class not found in symbol table");
+                new Exception("Class " + currentClass + " not found in symbol table");
             }
         }
         
@@ -202,7 +204,7 @@ class VisitorST extends GJDepthFirst<String, Void>{
             classDec.methods.put(myName, methodDec);
             methodDec.classInto = classDec;
         } else {
-            System.err.println("Error: Class not found in symbol table");
+            new Exception("Class " + currentClass + " not found in symbol table");
         }
         
         // Arguments list
@@ -216,7 +218,7 @@ class VisitorST extends GJDepthFirst<String, Void>{
                     String argName = parts[1];
                     methodDec.setArgument(argName, argType);
                 } else {
-                    System.err.println("Error: Invalid argument format");
+                    new Exception("Invalid argument format");
                 }
             }
         }
@@ -240,6 +242,9 @@ class VisitorST extends GJDepthFirst<String, Void>{
         n.f11.accept(this, argu);
         n.f12.accept(this, argu);
 
+        // Reset current method
+        currentMethod = null;
+        
         return null;
     }
 

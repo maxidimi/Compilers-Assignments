@@ -13,28 +13,7 @@ class SymbolTable {
         methods = new HashMap<>();
     }
 
-    public void setClass(String name, ClassDec classDec) {
-        // Check if the class already exists
-        if (classes.containsKey(name)) {
-            System.err.println("Error: Class " + name + " already exists");
-            return;
-        }
-
-        // Add a class to the symbol table
-        classes.put(name, classDec);
-    }
-
-    public void setMethod(String name, MethodDec methodDec) {
-        // Check if the method already exists
-        if (methods.containsKey(name)) {
-            System.err.println("Error: Method " + name + " already exists");
-            return;
-        }
-
-        // Add a method to the symbol table
-        methods.put(name, methodDec);
-    }
-    
+    // Getters
     public ClassDec getClass(String name) {
         return classes.get(name);
     }
@@ -49,5 +28,28 @@ class SymbolTable {
 
     public boolean methodExists(String name) {
         return methods.containsKey(name);
+    }
+
+    // Setters
+    public void setClass(String name, ClassDec classDec) {
+        // Check if the class already exists
+        if (classes.containsKey(name)) {
+            new Exception("Class " + name + " already exists");
+            return;
+        }
+
+        // Add a class to the symbol table
+        classes.put(name, classDec);
+    }
+
+    public void setMethod(String name, MethodDec methodDec) {
+        // Check if the method already exists
+        if (methods.containsKey(name)) {
+            new Exception("Method " + name + " already exists");
+            return;
+        }
+
+        // Add a method to the symbol table
+        methods.put(name, methodDec);
     }
 }

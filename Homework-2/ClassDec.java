@@ -17,12 +17,14 @@ class ClassDec {
     Map<String, MethodDec> methods;
 
     // Total offset
-    int offset;
+    int varOffset;
+    int methodOffset;
 
-    ClassDec(String name, String parent, int offset) {
+    ClassDec(String name, String parent, int varOffset, int methodOffset) {
         this.name = name;
         this.parent = parent;
-        this.offset = 0;
+        this.varOffset = varOffset;
+        this.methodOffset = methodOffset;
         // LinkedHashMap to keep insertion order
         this.fields = new LinkedHashMap<>();
         this.methods = new LinkedHashMap<>();
@@ -37,8 +39,12 @@ class ClassDec {
         return parent;
     }
 
-    public int getOffset() {
-        return offset;
+    public int getVarOffset() {
+        return varOffset;
+    }
+
+    public int getMethodOffset() {
+        return methodOffset;
     }
 
     public Map<String, VariableDec> getFields() {
@@ -58,27 +64,33 @@ class ClassDec {
         this.parent = parent;
     }
 
-    public void setOffset(int offset) {
-        this.offset = offset;
+    public void setVarOffset(int varOffset) {
+        this.varOffset = varOffset;
+    }
+
+    public void setMethodOffset(int methodOffset) {
+        this.methodOffset = methodOffset;
     }
 
     public void setField(String name, String type) {
         // Check if the field already exists
         if (fields.containsKey(name)) {
-            System.err.println("Error: Field " + name + " already exists in class " + this.name);
+            new Exception("Field " + name + " already exists in class " + this.name);
             return;
         }
         
         // Add a field to the class
-        fields.put(name, new VariableDec(name, type));
+        VariableDec field = new VariableDec(name, type);
+        fields.put(name, field);
 
         // Update the offset
+        field.setOffset(varOffset);
         if (type.equals("int")) {
-            offset += 4;
+            varOffset += 4;
         } else if (type.equals("boolean")) {
-            offset += 1;
-        } else { // Array
-            offset += 8; 
+            varOffset += 1;
+        } else { // Array or object
+            varOffset += 8; 
         }
     }
     
@@ -87,7 +99,7 @@ class ClassDec {
 
         // Check if the method already exists
         if (methods.containsKey(methodName)) {
-            System.err.println("Error: Method " + methodName + " already exists in class " + this.name);
+            new Exception("Method " + methodName + " already exists in class " + this.name);
             return;
         }
         // Add a method to the class
@@ -95,6 +107,7 @@ class ClassDec {
         method.classInto = this; // Set the class that contains the method
 
         // Update the offset
-        offset += 8;
+        method.setOffset(methodOffset);
+        methodOffset += 8;
     }
 }

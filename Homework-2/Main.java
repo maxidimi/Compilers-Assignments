@@ -31,12 +31,12 @@ public class Main {
 
                     System.out.println("\t\tFields: ");
                     for (String field : v.fields.keySet()) {
-                        System.out.println("\t\t\t" + field + " --> " + v.fields.get(field).type);
+                        System.out.println("\t\t\t" + field + " --> " + v.fields.get(field).type + " (offset: " + v.fields.get(field).offset + ")");
                     }
 
                     System.out.println("\t\tMethods: ");
                     for (String method : v.methods.keySet()) {
-                        System.out.println("\t\t\t" + method + " --> " + v.methods.get(method).returnType);
+                        System.out.println("\t\t\t" + method + " --> " + v.methods.get(method).returnType + " (offset: " + v.methods.get(method).offset + ")");
 
                         System.out.println("\t\t\t\tArguments:");
                         for (String arg : v.methods.get(method).arguments.keySet()) {
@@ -44,7 +44,9 @@ public class Main {
                         }
                     }
 
-                    System.out.println("\t\tOffset: " + v.offset);
+                    System.out.println("\t\tVar Offset: " + v.varOffset);
+                    System.out.println("\t\tMethod Offset: " + v.methodOffset);
+                    System.out.println();
                 });
 
                 //? Call another visitor to do the type checking

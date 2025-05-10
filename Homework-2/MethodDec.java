@@ -25,41 +25,10 @@ class MethodDec {
     MethodDec(String name, String returnType) {
         this.name = name;
         this.returnType = returnType;
-        this.classInto = null; // Default value
-        this.offset = -1; // Default value
+        this.classInto = null;
+        this.offset = 0;
         this.variables = new HashMap<>();
         this.arguments = new HashMap<>();
-    }
-
-    // Setters
-    public void setClassInto(ClassDec classInto) {
-        this.classInto = classInto;
-    }
-    
-    public void setOffset(int offset) {
-        this.offset = offset;
-    }
-
-    public void setArgument(String name, String type) {
-        // Check if the argument already exists
-        if (arguments.containsKey(name)) {
-            System.err.println("Error: Argument " + name + " already exists in method " + this.name);
-            return;
-        }
-
-        // Add an argument to the method
-        arguments.put(name, new VariableDec(name, type));
-    }
-
-    public void setVariable(String name, String type) {
-        // Check if the variable already exists
-        if (variables.containsKey(name)) {
-            System.err.println("Error: Variable " + name + " already exists in method " + this.name);
-            return;
-        }
-
-        // Add a variable to the method
-        variables.put(name, new VariableDec(name, type));
     }
 
     // Getters
@@ -85,5 +54,36 @@ class MethodDec {
 
     public Map<String, VariableDec> getVariables() {
         return variables;
+    }
+
+    // Setters
+    public void setClassInto(ClassDec classInto) {
+        this.classInto = classInto;
+    }
+    
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
+
+    public void setArgument(String name, String type) {
+        // Check if the argument already exists
+        if (arguments.containsKey(name)) {
+            new Exception("Argument " + name + " already exists in method " + this.name);
+            return;
+        }
+
+        // Add an argument to the method
+        arguments.put(name, new VariableDec(name, type));
+    }
+
+    public void setVariable(String name, String type) {
+        // Check if the variable already exists
+        if (variables.containsKey(name)) {
+            new Exception("Variable " + name + " already exists in method " + this.name);
+            return;
+        }
+
+        // Add a variable to the method
+        variables.put(name, new VariableDec(name, type));
     }
 }
