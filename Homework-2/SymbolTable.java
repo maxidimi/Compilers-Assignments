@@ -21,12 +21,11 @@ class SymbolTable {
     }
 
     // Setters
-    public void setClass(ClassDec classDec) {
+    public void setClass(ClassDec classDec) throws Exception {
         String name = classDec.getName();
         // Check if the class already exists
         if (classes.containsKey(name)) {
-            new Exception("Class " + name + " already exists");
-            return;
+            throw new Exception("Class " + name + " already exists");
         }
 
         // Add the class to the symbol table

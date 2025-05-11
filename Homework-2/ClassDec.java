@@ -72,11 +72,10 @@ class ClassDec {
         this.methodOffset = methodOffset;
     }
 
-    public void setField(String name, String type) {
-        // Check if the field already exists
+    public void setField(String name, String type) throws Exception {
+        // Check if the field already exists manually
         if (fields.containsKey(name)) {
-            new Exception("Field " + name + " already exists in class " + this.name);
-            return;
+            throw new Exception("Field " + name + " already exists in class " + this.name);
         }
         
         // Add a field to the class
@@ -94,13 +93,12 @@ class ClassDec {
         }
     }
     
-    public void setMethod(MethodDec method) {
+    public void setMethod(MethodDec method) throws Exception {
         String methodName = method.getName();
 
         // Check if the method already exists
         if (methods.containsKey(methodName)) {
-            new Exception("Method " + methodName + " already exists in class " + this.name);
-            return;
+            throw new Exception("Method " + methodName + " already exists in class " + this.name);
         }
         // Add a method to the class
         methods.put(methodName, method);

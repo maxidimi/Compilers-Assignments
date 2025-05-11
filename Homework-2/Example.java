@@ -7,6 +7,7 @@ class Example {
 class A {
     int i;
     A a;
+    A a;
 
     public int foo(int i, int j) {
         int k;
@@ -44,5 +45,15 @@ class C extends B {
     
     public int foobar(boolean k) {
         return 1;
+    }
+
+    public int[] threepar(int i, int j, int k, boolean[] l) {
+        int[] m;
+        m = new int[10];
+        m[0] = i;
+        m[1] = j;
+        m[2] = k;
+
+        return m;
     }
 }

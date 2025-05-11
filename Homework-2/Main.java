@@ -54,8 +54,11 @@ public class Main {
                     System.out.println();
                 });
 
-                //? Call another visitor to do the type checking
-                //VisitorCheck check = new VisitorCheck(symbolTable);
+                // Call another visitor to do the type checking
+                VisitorCheck check = new VisitorCheck(symbolTable);
+                root.accept(check, null);
+
+                System.out.println("Type checking completed successfully!");
             }
             catch(ParseException ex){
                 System.out.println(ex.getMessage());

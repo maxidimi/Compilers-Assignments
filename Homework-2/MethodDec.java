@@ -61,22 +61,20 @@ class MethodDec {
         this.offset = offset;
     }
 
-    public void setArgument(String name, String type) {
+    public void setArgument(String name, String type) throws Exception {
         // Check if the argument already exists
         if (arguments.containsKey(name)) {
-            new Exception("Argument " + name + " already exists in method " + this.name);
-            return;
+            throw new Exception("Argument " + name + " already exists in method " + this.name);
         }
 
         // Add an argument to the method
         arguments.put(name, new VariableDec(name, type));
     }
 
-    public void setVariable(String name, String type) {
+    public void setVariable(String name, String type) throws Exception {
         // Check if the variable already exists
         if (variables.containsKey(name)) {
-            new Exception("Variable " + name + " already exists in method " + this.name);
-            return;
+            throw new Exception("Variable " + name + " already exists in method " + this.name);
         }
 
         // Add a variable to the method
