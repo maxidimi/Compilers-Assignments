@@ -42,6 +42,11 @@ public class Main {
                         for (String arg : v.methods.get(method).arguments.keySet()) {
                             System.out.println("\t\t\t\t\t" + arg + " == " + v.methods.get(method).arguments.get(arg).type);
                         }
+
+                        System.out.println("\t\t\t\tVariables:");
+                        for (String var : v.methods.get(method).variables.keySet()) {
+                            System.out.println("\t\t\t\t\t" + var + " == " + v.methods.get(method).variables.get(var).type);
+                        }
                     }
 
                     System.out.println("\t\tVar Offset: " + v.varOffset);

@@ -57,10 +57,6 @@ class MethodDec {
     }
 
     // Setters
-    public void setClassInto(ClassDec classInto) {
-        this.classInto = classInto;
-    }
-    
     public void setOffset(int offset) {
         this.offset = offset;
     }

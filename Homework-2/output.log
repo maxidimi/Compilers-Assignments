@@ -8,42 +8,45 @@ Classes in the symbol table:
 				Arguments:
 					i == int
 					j == int
-			bar --> int (offset: 0)
+				Variables:
+					k == int
+			bar --> int (offset: 8)
 				Arguments:
+				Variables:
 		Var Offset: 12
-		Method Offset: 0
+		Method Offset: 16
 
 	Class: B (extends A)
 		Fields: 
-			i --> int (offset: 0)
-			a --> A (offset: 4)
+			i --> int (offset: 12)
 		Methods: 
-			foo --> int (offset: 0)
+			foo --> int (offset: 16)
 				Arguments:
 					i == int
 					j == int
-			bar --> int (offset: 0)
-				Arguments:
-			foobar --> int (offset: 0)
+				Variables:
+					k == boolean[]
+			foobar --> int (offset: 24)
 				Arguments:
 					k == boolean
-		Var Offset: 12
-		Method Offset: 0
+				Variables:
+		Var Offset: 16
+		Method Offset: 32
 
 	Class: C (extends B)
 		Fields: 
-			i --> int (offset: 0)
-			a --> A (offset: 4)
+			i --> int (offset: 16)
+			k --> int[] (offset: 20)
 		Methods: 
-			foo --> int (offset: 0)
+			foo --> int (offset: 32)
 				Arguments:
 					i == int
 					j == int
-			bar --> int (offset: 0)
-				Arguments:
-			foobar --> int (offset: 0)
+				Variables:
+			foobar --> int (offset: 40)
 				Arguments:
 					k == boolean
-		Var Offset: 12
-		Method Offset: 0
+				Variables:
+		Var Offset: 28
+		Method Offset: 48
 

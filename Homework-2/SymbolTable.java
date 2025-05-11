@@ -6,11 +6,9 @@ class SymbolTable {
     
     // Store the classes in the symbol table - their variables and methods
     Map<String, ClassDec> classes;
-    Map<String, MethodDec> methods;
 
     SymbolTable() {
         classes = new HashMap<>();
-        methods = new HashMap<>();
     }
 
     // Getters
@@ -18,38 +16,20 @@ class SymbolTable {
         return classes.get(name);
     }
 
-    public MethodDec getMethod(String name) {
-        return methods.get(name);
-    }
-
     public boolean classExists(String name) {
         return classes.containsKey(name);
     }
 
-    public boolean methodExists(String name) {
-        return methods.containsKey(name);
-    }
-
     // Setters
-    public void setClass(String name, ClassDec classDec) {
+    public void setClass(ClassDec classDec) {
+        String name = classDec.getName();
         // Check if the class already exists
         if (classes.containsKey(name)) {
             new Exception("Class " + name + " already exists");
             return;
         }
 
-        // Add a class to the symbol table
+        // Add the class to the symbol table
         classes.put(name, classDec);
-    }
-
-    public void setMethod(String name, MethodDec methodDec) {
-        // Check if the method already exists
-        if (methods.containsKey(name)) {
-            new Exception("Method " + name + " already exists");
-            return;
-        }
-
-        // Add a method to the symbol table
-        methods.put(name, methodDec);
     }
 }

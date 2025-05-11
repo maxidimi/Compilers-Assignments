@@ -24,6 +24,8 @@ class B extends A {
     int i;
 
     public int foo(int i, int j) {
+        boolean[] k;
+        k = new boolean[10];
         return i+j;
     }
     
@@ -34,6 +36,7 @@ class B extends A {
 
 class C extends B {
     int i;
+    int[] k;
 
     public int foo(int i, int j) {
         return i+j;

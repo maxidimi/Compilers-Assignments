@@ -20,11 +20,11 @@ class ClassDec {
     int varOffset;
     int methodOffset;
 
-    ClassDec(String name, String parent, int varOffset, int methodOffset) {
+    ClassDec(String name, ClassDec parent) {
         this.name = name;
-        this.parent = parent;
-        this.varOffset = varOffset;
-        this.methodOffset = methodOffset;
+        this.parent = parent != null ? parent.name : null;
+        this.varOffset = parent != null ? parent.varOffset : 0;
+        this.methodOffset = parent != null ? parent.methodOffset : 0;
         // LinkedHashMap to keep insertion order
         this.fields = new LinkedHashMap<>();
         this.methods = new LinkedHashMap<>();
@@ -47,6 +47,14 @@ class ClassDec {
         return methodOffset;
     }
 
+    public VariableDec getField(String name) {
+        return fields.get(name);
+    }
+
+    public MethodDec getMethod(String name) {
+        return methods.get(name);
+    }
+
     public Map<String, VariableDec> getFields() {
         return fields;
     }
@@ -56,14 +64,6 @@ class ClassDec {
     }
 
     // Setters
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setParent(String parent) {
-        this.parent = parent;
-    }
-
     public void setVarOffset(int varOffset) {
         this.varOffset = varOffset;
     }
