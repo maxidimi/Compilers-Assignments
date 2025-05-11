@@ -7,10 +7,12 @@ class Example {
 class A {
     int i;
     A a;
-    A a;
 
     public int foo(int i, int j) {
         int k;
+        {
+            k = 0;
+        }
         k = i+j;
 
         return k; 

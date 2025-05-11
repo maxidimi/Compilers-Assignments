@@ -11,6 +11,8 @@ class VisitorST extends GJDepthFirst<String, Void>{
     String currentClass;
     String currentMethod;
 
+    String mainClassName;
+
     // Constructor
     VisitorST() {
         symbolTable = new SymbolTable();
@@ -43,7 +45,29 @@ class VisitorST extends GJDepthFirst<String, Void>{
     public String visit(MainClass n, Void argu) throws Exception {
         n.f1.accept(this, null);
 
-        //? get var decls and statements
+        // Main class name
+        String mainClassName = n.f1.accept(this, null);
+        currentClass = mainClassName;
+
+        // Create main class & add it to the symbol table
+        String mainClass = n.f1.accept(this, null);
+        ClassDec mainClassDec = new ClassDec(mainClass, null);
+        symbolTable.setClass(mainClassDec);
+        this.mainClassName = mainClass;
+
+        // Command line arguments
+        String args = n.f11.accept(this, null);
+        String argsType = "String[]";
+        MethodDec mainMethod = new MethodDec("main", "void");
+        mainMethod.setArgument(args, argsType);
+
+        // Variables
+        inVarDecleration = true;
+        n.f14.accept(this, argu);
+        inVarDecleration = false;
+
+        // Statements
+        n.f15.accept(this, argu);
 
         return null;
     }
@@ -62,6 +86,11 @@ class VisitorST extends GJDepthFirst<String, Void>{
         // Classname
         String classname = n.f1.accept(this, argu);
         currentClass = classname;
+
+        // Check if the class has same name as the main class
+        if (classname.equals(mainClassName)) {
+            throw new Exception("Class " + classname + " cannot be the same as the main class");
+        }
 
         // Create class & add it to the symbol table
         ClassDec classDec = new ClassDec(classname, null);
@@ -94,6 +123,11 @@ class VisitorST extends GJDepthFirst<String, Void>{
         // Classname
         String classname = n.f1.accept(this, null);
         currentClass = classname;
+
+        // Check if the class has same name as the main class
+        if (classname.equals(mainClassName)) {
+            throw new Exception("Class " + classname + " cannot be the same as the main class");
+        }
 
         // Parent class
         String parent = n.f3.accept(this, argu);

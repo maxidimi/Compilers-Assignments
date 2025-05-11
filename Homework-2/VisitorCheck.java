@@ -145,13 +145,9 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         // Name of the variable
         String var = n.f1.accept(this, argu);
 
-        // 
-
-        // If in var decleration zone, check if var type is valid
-        if (inVarDecleration) {
-            if (!isValidType(type)) {
-                throw new Exception("Invalid type " + type + " for variable " + var);
-            }
+        // Check if the type is valid
+        if (!isValidType(type)) {
+            throw new Exception("Invalid type " + type + " for variable " + var);
         }
         
         return _ret;
@@ -251,6 +247,11 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
         // Name of argument
         String name = n.f1.accept(this, null);
+
+        // Check if the type is valid
+        if (!isValidType(type)) {
+            throw new Exception("Invalid type " + type + " for argument " + name);
+        }
 
         return type + " " + name;
     }

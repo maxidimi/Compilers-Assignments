@@ -77,6 +77,11 @@ class MethodDec {
             throw new Exception("Variable " + name + " already exists in method " + this.name);
         }
 
+        // Check if the variable is an argument
+        if (arguments.containsKey(name)) {
+            throw new Exception("Variable " + name + " already exists as an argument in method " + this.name);
+        }
+
         // Add a variable to the method
         variables.put(name, new VariableDec(name, type));
     }
