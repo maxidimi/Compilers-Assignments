@@ -50,16 +50,19 @@ class VisitorST extends GJDepthFirst<String, Void>{
         currentClass = mainClassName;
 
         // Create main class & add it to the symbol table
-        String mainClass = n.f1.accept(this, null);
-        ClassDec mainClassDec = new ClassDec(mainClass, null);
-        symbolTable.setClass(mainClassDec);
-        this.mainClassName = mainClass;
+        ClassDec mainClass = new ClassDec(mainClassName, null);
+        symbolTable.setClass(mainClass);
+        this.mainClassName = mainClassName;
 
         // Command line arguments
         String args = n.f11.accept(this, null);
         String argsType = "String[]";
         MethodDec mainMethod = new MethodDec("main", "void");
         mainMethod.setArgument(args, argsType);
+
+        // Add the main method to the main class
+        mainClass.setMethod(mainMethod);
+        currentMethod = "main";
 
         // Variables
         inVarDecleration = true;

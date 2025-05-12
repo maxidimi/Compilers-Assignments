@@ -58,7 +58,8 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     public String visit(MainClass n, Void argu) throws Exception {
         n.f1.accept(this, null);
 
-        //? get var decls and statements
+        // Statements
+        n.f15.accept(this, null);
 
         return null;
     }
@@ -254,6 +255,21 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         }
 
         return type + " " + name;
+    }
+
+    @Override
+    public String visit(IntegerLiteral n, Void argu) throws Exception {
+        return "int";
+    }
+
+    @Override
+    public String visit(TrueLiteral n, Void argu) throws Exception {
+        return "boolean";
+    }
+
+    @Override
+    public String visit(FalseLiteral n, Void argu) throws Exception {
+        return "boolean";
     }
 
     @Override

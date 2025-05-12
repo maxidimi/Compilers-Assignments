@@ -61,7 +61,12 @@ Classes in the symbol table:
 	Class: Example
 		Fields: 
 		Methods: 
+			main --> void (offset: 0)
+				Arguments:
+					args == String[]
+				Variables:
+					a == A
 		Var Offset: 0
-		Method Offset: 0
+		Method Offset: 8
 
 Type checking completed successfully!
