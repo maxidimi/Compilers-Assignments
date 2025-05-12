@@ -257,6 +257,145 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         return type + " " + name;
     }
 
+    /**
+     * f0 -> "{" 
+     * f1 -> ( Statement() )* 
+     * f2 -> "}"
+     */
+    @Override
+    public String visit(Block n, Void argu) throws Exception {
+        // Statements
+        n.f1.accept(this, argu);
+
+        return null;
+    }
+
+    /**
+     * f0 -> "System.out.println"
+     * f1 -> "("
+     * f2 -> Expression()
+     * f3 -> ")"
+     * f4 -> ";"
+     */
+    @Override
+    public String visit(PrintStatement n, Void argu) throws Exception {
+        // Expression in print
+        n.f2.accept(this, argu);
+
+        return null;
+    }
+
+    /**
+     * f0 -> AndExpression() | CompareExpression() | PlusExpression() | MinusExpression() | 
+     *       TimesExpression() | ArrayLookup() | ArrayLength() | MessageSend() | Clause()
+     */
+    @Override
+    public String visit(Expression n, Void argu) throws Exception {
+        // Visit the expression and return the type
+        String type = n.f0.accept(this, argu);
+
+        return type;
+    }
+
+    /**
+     * f0 -> Clause() 
+     * f1 -> "&&" 
+     * f2 -> Clause()
+     */
+    @Override
+    public String visit(AndExpression n, Void argu) throws Exception {
+        // Left expression
+        n.f0.accept(this, argu);
+
+        // Right expression
+        n.f2.accept(this, argu);
+
+        return "boolean";
+    }
+
+    /**
+     * f0 -> PrimaryExpression() 
+     * f1 -> "<" 
+     * f2 -> PrimaryExpression()
+     */
+    @Override
+    public String visit(CompareExpression n, Void argu) throws Exception {
+        // Left expression
+        String left = n.f0.accept(this, argu);
+
+        // Right expression
+        String right = n.f2.accept(this, argu);
+
+        // Check if the types are valid
+        if (!left.equals("int") || !right.equals("int")) {
+            throw new Exception("Invalid types for comparison: " + left + " and " + right);
+        }
+
+        return "boolean";
+    }
+    /**
+     * f0 -> PrimaryExpression() 
+     * f1 -> "+" 
+     * f2 -> PrimaryExpression()
+     */
+    @Override
+    public String visit(PlusExpression n, Void argu) throws Exception {
+        // Left expression
+        String left = n.f0.accept(this, argu);
+
+        // Right expression
+        String right = n.f2.accept(this, argu);
+
+        // Check if the types are valid
+        if (!left.equals("int") || !right.equals("int")) {
+            throw new Exception("Invalid types for addition: " + left + " and " + right);
+        }
+
+        return "int";
+    }
+
+    /**
+     * f0 -> PrimaryExpression() 
+     * f1 -> "-" 
+     * f2 -> PrimaryExpression()
+     */
+    @Override
+    public String visit(MinusExpression n, Void argu) throws Exception {
+        // Left expression
+        String left = n.f0.accept(this, argu);
+
+        // Right expression
+        String right = n.f2.accept(this, argu);
+
+        // Check if the types are valid
+        if (!left.equals("int") || !right.equals("int")) {
+            throw new Exception("Invalid types for subtraction: " + left + " and " + right);
+        }
+
+        return "int";
+    }
+
+    /**
+     * f0 -> PrimaryExpression() 
+     * f1 -> "*" 
+     * f2 -> PrimaryExpression()
+     */
+    @Override
+    public String visit(TimesExpression n, Void argu) throws Exception {
+        // Left expression
+        String left = n.f0.accept(this, argu);
+
+        // Right expression
+        String right = n.f2.accept(this, argu);
+
+        // Check if the types are valid
+        if (!left.equals("int") || !right.equals("int")) {
+            throw new Exception("Invalid types for multiplication: " + left + " and " + right);
+        }
+
+        return "int";
+    }
+
     @Override
     public String visit(IntegerLiteral n, Void argu) throws Exception {
         return "int";
