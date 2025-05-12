@@ -2,7 +2,8 @@ Classes in the symbol table:
 	Class: A
 		Fields: 
 			i --> int (offset: 0)
-			a --> A (offset: 4)
+			l --> int[] (offset: 4)
+			a --> A (offset: 12)
 		Methods: 
 			foo --> int (offset: 0)
 				Arguments:
@@ -13,12 +14,12 @@ Classes in the symbol table:
 			bar --> int (offset: 8)
 				Arguments:
 				Variables:
-		Var Offset: 12
+		Var Offset: 20
 		Method Offset: 16
 
 	Class: B (extends A)
 		Fields: 
-			i --> int (offset: 12)
+			i --> int (offset: 20)
 		Methods: 
 			foo --> int (offset: 16)
 				Arguments:
@@ -30,13 +31,13 @@ Classes in the symbol table:
 				Arguments:
 					k == boolean
 				Variables:
-		Var Offset: 16
+		Var Offset: 24
 		Method Offset: 32
 
 	Class: C (extends B)
 		Fields: 
-			i --> int (offset: 16)
-			k --> int[] (offset: 20)
+			i --> int (offset: 24)
+			k --> int[] (offset: 28)
 		Methods: 
 			foo --> int (offset: 32)
 				Arguments:
@@ -55,7 +56,7 @@ Classes in the symbol table:
 					l == boolean[]
 				Variables:
 					m == int[]
-		Var Offset: 28
+		Var Offset: 36
 		Method Offset: 56
 
 	Class: Example
@@ -65,7 +66,6 @@ Classes in the symbol table:
 				Arguments:
 					args == String[]
 				Variables:
-					a == A
 		Var Offset: 0
 		Method Offset: 8
 

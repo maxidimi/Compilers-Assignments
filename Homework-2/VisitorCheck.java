@@ -14,6 +14,11 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     ClassDec currentClassDec;
     MethodDec currentMethodDec;
 
+    boolean zeroArraylength;
+
+    String varId;
+    String varType;
+
     VisitorCheck(SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
         this.inVarDecleration = false;
@@ -21,10 +26,14 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         this.currentMethod = null;
         this.currentClassDec = null;
         this.currentMethodDec = null;
+        this.zeroArraylength = false;
     }
 
     public boolean isValidType(String type) {
         // Check if the type is valid
+        if (type == null) {
+            return false;
+        }
         if (type.equals("int") || type.equals("boolean") || type.equals("int[]") || type.equals("boolean[]")) {
             return true;
         } else if (symbolTable.classExists(type)) {
@@ -116,9 +125,6 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
             throw new Exception("Class " + classname + " not found in symbol table");
         }
 
-        // Parent class
-        String parent = n.f3.accept(this, argu);
-
         // Fields
         n.f5.accept(this, argu);
 
@@ -137,7 +143,8 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     * f1 -> Identifier()
     * f2 -> ";"
     */
-   public String visit(VarDeclaration n, Void argu) throws Exception {
+    @Override
+    public String visit(VarDeclaration n, Void argu) throws Exception {
         String _ret=null;
 
         // Type of the variable
@@ -177,6 +184,10 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         // Name of the method
         String myName = n.f2.accept(this, null);
         currentMethod = myName;
+        currentMethodDec = symbolTable.getClass(currentClass).getMethod(myName);
+        if (currentMethodDec == null) {
+            throw new Exception("Method " + myName + " not found in symbol table, class " + currentClass);
+        }
         
         // Arguments list
         String argumentList = n.f4.accept(this, argu);
@@ -217,6 +228,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
      * f0 -> FormalParameter()
      * f1 -> FormalParameterTail()
      */
+    @Override
     public String visit(FormalParameterTerm n, Void argu) throws Exception {
         //? f0
         return n.f1.accept(this, argu);
@@ -270,6 +282,19 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         return null;
     }
 
+    @Override
+    public String visit(BracketExpression n, Void argu) throws Exception {
+        // Expression
+        String type = n.f1.accept(this, argu);
+
+        // Check if the type is valid
+        if (type == null) {
+            throw new Exception("Invalid null type for bracket expression");
+        }
+
+        return type;
+    }
+
     /**
      * f0 -> "System.out.println"
      * f1 -> "("
@@ -280,7 +305,12 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     @Override
     public String visit(PrintStatement n, Void argu) throws Exception {
         // Expression in print
-        n.f2.accept(this, argu);
+        String expr = n.f2.accept(this, argu);
+
+        // Check if the type is valid
+        if ((expr == null) || !expr.equals("int")) {
+            //?throw new Exception("Invalid type for print statement: " + expr);
+        }
 
         return null;
     }
@@ -298,6 +328,90 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     }
 
     /**
+     * f0 -> IntegerLiteral() | TrueLiteral() | FalseLiteral() | Identifier() | 
+     *       ThisExpression() | ArrayAllocationExpression() | AllocationExpression() | BracketExpression()
+     */
+    @Override
+    public String visit(PrimaryExpression n, Void argu) throws Exception {
+        // Visit the primary expression and return the type
+        String type = n.f0.accept(this, argu);
+
+        return type;
+    }
+
+    /**
+     * f0 -> "new" 
+     * f1 -> Identifier() 
+     * f2 -> "(" 
+     * f3 -> ")"
+     */
+    @Override
+    public String visit(AllocationExpression n, Void argu) throws Exception {
+        String type = n.f1.accept(this, argu);
+        
+        // Check if the type is valid
+        if (!isValidType(type)) {
+            throw new Exception("Invalid type " + type + " for allocation expression");
+        }
+
+        return type;
+    }
+
+    /**
+     * f0 -> "this"
+     */
+    @Override
+    public String visit(ThisExpression n, Void argu) throws Exception {
+        // Check if the current class is valid
+        if (currentClass == null) {
+            throw new Exception("Invalid this expression: " + n.f0.toString());
+        }
+
+        return currentClass;
+    }
+
+    /**
+     * f0 -> PrimaryExpression() 
+     * f1 -> "[" 
+     * f2 -> PrimaryExpression() 
+     * f3 -> "]"
+     */
+    @Override
+    public String visit(ArrayLookup n, Void argu) throws Exception {
+        // Array name
+        String array = n.f0.accept(this, argu);
+
+        // Index type
+        String index = n.f2.accept(this, argu);
+
+        // Find the array type
+        String arrayType = lookForId(array);
+
+        // Check if the types are valid
+        if ((arrayType == null) || (index == null) || !arrayType.equals("int[]") || !index.equals("int")) {
+            throw new Exception("Invalid types for array lookup: " + arrayType + " and " + index);
+        }
+
+        return arrayType.substring(0, arrayType.length() - 2); // Remove the brackets
+    }
+
+    /**
+     * f0 -> "!" 
+     * f1 -> Clause()
+     */
+    @Override
+    public String visit(NotExpression n, Void argu) throws Exception {
+        // Clause
+        String clause = n.f1.accept(this, argu);
+
+        // Check if the type is boolean
+        if ((clause == null) || !clause.equals("boolean")) {
+            throw new Exception("Invalid type for not expression: " + clause);
+        }
+
+        return "boolean";
+    }
+    /**
      * f0 -> Clause() 
      * f1 -> "&&" 
      * f2 -> Clause()
@@ -305,14 +419,18 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     @Override
     public String visit(AndExpression n, Void argu) throws Exception {
         // Left expression
-        n.f0.accept(this, argu);
+        String left = n.f0.accept(this, argu);
 
         // Right expression
-        n.f2.accept(this, argu);
+        String right = n.f2.accept(this, argu);
+
+        // Check if the types are valid
+        if ((left == null) || (right == null) || !left.equals("boolean") || !right.equals("boolean")) {
+            throw new Exception("Invalid types for and expression: " + left + " and " + right);
+        }
 
         return "boolean";
     }
-
     /**
      * f0 -> PrimaryExpression() 
      * f1 -> "<" 
@@ -327,12 +445,13 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         String right = n.f2.accept(this, argu);
 
         // Check if the types are valid
-        if (!left.equals("int") || !right.equals("int")) {
+        if ((left == null) || (right == null) || !left.equals("int") || !right.equals("int")) {
             throw new Exception("Invalid types for comparison: " + left + " and " + right);
         }
 
         return "boolean";
     }
+    
     /**
      * f0 -> PrimaryExpression() 
      * f1 -> "+" 
@@ -347,13 +466,12 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         String right = n.f2.accept(this, argu);
 
         // Check if the types are valid
-        if (!left.equals("int") || !right.equals("int")) {
+        if ((left == null) || (right == null) || !left.equals("int") || !right.equals("int")) {
             throw new Exception("Invalid types for addition: " + left + " and " + right);
         }
 
         return "int";
     }
-
     /**
      * f0 -> PrimaryExpression() 
      * f1 -> "-" 
@@ -368,13 +486,12 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         String right = n.f2.accept(this, argu);
 
         // Check if the types are valid
-        if (!left.equals("int") || !right.equals("int")) {
+        if ((left == null) || (right == null) || !left.equals("int") || !right.equals("int")) {
             throw new Exception("Invalid types for subtraction: " + left + " and " + right);
         }
 
         return "int";
     }
-
     /**
      * f0 -> PrimaryExpression() 
      * f1 -> "*" 
@@ -389,50 +506,146 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         String right = n.f2.accept(this, argu);
 
         // Check if the types are valid
-        if (!left.equals("int") || !right.equals("int")) {
+        if ((left == null) || (right == null) || !left.equals("int") || !right.equals("int")) {
             throw new Exception("Invalid types for multiplication: " + left + " and " + right);
         }
 
         return "int";
     }
 
+    /**
+     * f0 -> PrimaryExpression() 
+     * f1 -> "." 
+     * f2 -> "length"
+     */
     @Override
-    public String visit(IntegerLiteral n, Void argu) throws Exception {
+    public String visit(ArrayLength n, Void argu) throws Exception {
+        // Array
+        String array = n.f0.accept(this, argu);
+
+        // Check if the type is valid
+        if ((array == null) || !array.equals("int[]") && !array.equals("boolean[]")) {
+            throw new Exception("Invalid type for array length: " + array);
+        }
+
         return "int";
     }
+    /**
+     * f0 -> "new" 
+     * f1 -> "boolean" 
+     * f2 -> "[" 
+     * f3 -> Expression() 
+     * f4 -> "]"
+     */
+    @Override
+    public String visit(BooleanArrayAllocationExpression n, Void argu) throws Exception {
+        String type = n.f3.accept(this, argu);
 
+        if (!type.equals("int")) {
+            throw new Exception("Invalid type for array size: " + type);
+        }
+
+        if (zeroArraylength) {
+            throw new Exception("Array length cannot be zero");
+        }
+
+        return "boolean[]";
+    }
+    /**
+     * f0 -> "new" 
+     * f1 -> "int" 
+     * f2 -> "[" 
+     * f3 -> Expression() 
+     * f4 -> "]"
+     */
+    @Override
+    public String visit(IntegerArrayAllocationExpression n, Void argu) throws Exception {
+        // Size of the array
+        String type = n.f3.accept(this, argu);
+
+        if (!type.equals("int")) {
+            throw new Exception("Invalid type for array size: " + type);
+        }
+
+        if (zeroArraylength) {
+            throw new Exception("Array length cannot be zero");
+        }
+
+        return "int[]";
+    }
+    /**
+     * f0 -> BooleanArrayAllocationExpression() | IntegerArrayAllocationExpression()
+     */
+    @Override
+    public String visit(ArrayAllocationExpression n, Void argu) throws Exception {
+        String type = n.f0.accept(this, argu);
+
+        if (type == null) {
+            throw new Exception("Invalid type for array allocation: " + type);
+        }
+
+        return type;
+    }
+
+    @Override
+    public String visit(IntegerLiteral n, Void argu) throws Exception {
+        int value = Integer.parseInt(n.f0.toString());
+        zeroArraylength = (value == 0); // Used to check if the array length is zero
+
+        return "int";
+    }
     @Override
     public String visit(TrueLiteral n, Void argu) throws Exception {
         return "boolean";
     }
-
     @Override
     public String visit(FalseLiteral n, Void argu) throws Exception {
         return "boolean";
     }
-
     @Override
     public String visit(BooleanArrayType n, Void argu) {
         return "boolean[]";
     }
-
     @Override
     public String visit(IntegerArrayType n, Void argu) {
         return "int[]";
     }
-
     @Override
     public String visit(BooleanType n, Void argu) {
         return "boolean";
     }
-
     @Override
     public String visit(IntegerType n, Void argu) {
         return "int";
     }
 
+    // Check for a variable in the symbol table and return its type
+    public String lookForId(String name) throws Exception {
+        // Check if the variable is a local variable of the current method
+        if (currentMethodDec != null) {
+            VariableDec var = currentMethodDec.getVariableOrArgument(name);
+            if (var != null) {
+                return var.getType();
+            }
+        } else {
+            throw new Exception("Current method is null");
+        }
+
+        // Check if the variable is a field of the current class
+        if (currentClassDec != null) {
+            VariableDec var = currentClassDec.getField(name);
+            if (var != null) {
+                return var.getType();
+            }
+        } else {
+            throw new Exception("Current class is null");
+        }
+
+        return null;
+    }
+
     @Override
-    public String visit(Identifier n, Void argu) {
+    public String visit(Identifier n, Void argu) throws Exception {
         // Identifier name
         return n.f0.toString();
     }

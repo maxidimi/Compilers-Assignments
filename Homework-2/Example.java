@@ -1,21 +1,20 @@
 class Example {
     public static void main(String[] args) {
-        A a;
-        a = new A();
         System.out.println(A.foo(1, 2));
     }
 }
 
 class A {
     int i;
+    int[] l;
     A a;
 
     public int foo(int i, int j) {
         int k;
         {
-            k = 0;
+            k = 1;
         }
-        k = i+j;
+        k = l[1];
 
         return k; 
     }
@@ -30,8 +29,8 @@ class B extends A {
 
     public int foo(int i, int j) {
         boolean[] k;
-        k = new boolean[10];
-        return i+j;
+        k = new boolean[1+1];
+        return 1;
     }
     
     public int foobar(boolean k) {
@@ -44,7 +43,7 @@ class C extends B {
     int[] k;
 
     public int foo(int i, int j) {
-        return i+j;
+        return 2;
     }
     
     public int foobar(boolean k) {

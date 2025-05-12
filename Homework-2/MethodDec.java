@@ -56,6 +56,21 @@ class MethodDec {
         return variables;
     }
 
+    public VariableDec getVariableOrArgument(String name) {
+        // Check if the variable is an argument
+        if (arguments.containsKey(name)) {
+            return arguments.get(name);
+        }
+
+        // Check if the variable is a local variable
+        if (variables.containsKey(name)) {
+            return variables.get(name);
+        }
+
+        // Variable not found
+        return null;
+    }
+
     // Setters
     public void setOffset(int offset) {
         this.offset = offset;
