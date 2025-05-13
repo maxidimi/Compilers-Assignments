@@ -23,6 +23,10 @@ public class Main {
 
                 SymbolTable symbolTable = eval.symbolTable; // Get the Symbol Table
 
+                // Call another visitor to do the type checking
+                VisitorCheck check = new VisitorCheck(symbolTable);
+                root.accept(check, null);
+
                 // For each class in the symbol table print its name
                 System.out.println("Classes in the symbol table:");
                 symbolTable.classes.forEach((k, v) -> {
@@ -53,10 +57,6 @@ public class Main {
                     System.out.println("\t\tMethod Offset: " + v.methodOffset);
                     System.out.println();
                 });
-
-                // Call another visitor to do the type checking
-                VisitorCheck check = new VisitorCheck(symbolTable);
-                root.accept(check, null);
 
                 System.out.println("Type checking completed successfully!");
             }

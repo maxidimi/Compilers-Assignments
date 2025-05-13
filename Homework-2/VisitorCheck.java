@@ -185,10 +185,14 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
         // Return expression
         String returnType = n.f10.accept(this, argu);
+        // Check if the return type is valid
+        if (returnType != null && !isValidType(returnType)) {
+            returnType = lookForId(returnType);
+        }
 
         // Check if the return type is same as in the signature
-        if ((returnType == null) || !returnType.equals(myType)) {
-            throw new Exception("Invalid return type for method " + myName + ": " + returnType);
+        if (!returnType.equals(myType)) {
+            throw new Exception("Invalid return type for method " + myName + ": " + returnType + (" instead of " + myType) + " in class " + currentClass);
         }
 
         // Reset current method
@@ -257,26 +261,13 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         return type + " " + name;
     }
 
-    /**
-     * f0 -> "{" 
-     * f1 -> ( Statement() )* 
-     * f2 -> "}"
-     */
-    @Override
-    public String visit(Block n, Void argu) throws Exception {
-        // Statements
-        n.f1.accept(this, argu);
-
-        return null;
-    }
-
     @Override
     public String visit(BracketExpression n, Void argu) throws Exception {
         // Expression
         String type = n.f1.accept(this, argu);
 
         // Check if the type is valid
-        if (type == null) {
+        if (!isValidType(type)) {
             throw new Exception("Invalid null type for bracket expression");
         }
 
@@ -297,7 +288,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
         // Check if the type is valid
         if ((expr == null) || !expr.equals("int")) {
-            //?throw new Exception("Invalid type for print statement: " + expr);
+            throw new Exception("Invalid type for print statement: " + expr);
         }
 
         return null;
@@ -343,6 +334,11 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         // Visit the primary expression and return the type
         String type = n.f0.accept(this, argu);
 
+        // Check if the type is valid
+        if (type == null) {
+            throw new Exception("Invalid null type for primary expression");
+        }
+
         return type;
     }
 
@@ -375,31 +371,6 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         }
 
         return currentClass;
-    }
-
-    /**
-     * f0 -> PrimaryExpression() 
-     * f1 -> "[" 
-     * f2 -> PrimaryExpression() 
-     * f3 -> "]"
-     */
-    @Override
-    public String visit(ArrayLookup n, Void argu) throws Exception {
-        // Array name
-        String array = n.f0.accept(this, argu);
-
-        // Index type
-        String index = n.f2.accept(this, argu);
-
-        // Find the array type
-        String arrayType = lookForId(array);
-
-        // Check if the types are valid
-        if ((arrayType == null) || (index == null) || !arrayType.equals("int[]") || !index.equals("int")) {
-            throw new Exception("Invalid types for array lookup: " + arrayType + " and " + index);
-        }
-
-        return arrayType.substring(0, arrayType.length() - 2); // Remove the brackets
     }
 
     /**
@@ -522,6 +493,31 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
     /**
      * f0 -> PrimaryExpression() 
+     * f1 -> "[" 
+     * f2 -> PrimaryExpression() 
+     * f3 -> "]"
+     */
+    @Override
+    public String visit(ArrayLookup n, Void argu) throws Exception {
+        // Array name
+        String array = n.f0.accept(this, argu);
+
+        // Index type
+        String index = n.f2.accept(this, argu);
+
+        //? Find the array type
+        String arrayType = lookForId(array);
+
+        // Check if the types are valid
+        if ((arrayType == null) || (index == null) || !arrayType.equals("int[]") || !index.equals("int")) {
+            throw new Exception("Invalid types for array lookup: " + arrayType + " and " + index);
+        }
+
+        return arrayType.substring(0, arrayType.length() - 2); // Remove the brackets
+    }
+
+    /**
+     * f0 -> PrimaryExpression() 
      * f1 -> "." 
      * f2 -> "length"
      */
@@ -530,7 +526,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         // Array
         String arrayName = n.f0.accept(this, argu);
 
-        // Find the array type
+        //? Find the array type
         String array = lookForId(arrayName);
 
         // Check if the type is valid
@@ -540,6 +536,118 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
         return "int";
     }
+
+    /**
+     * f0 -> Expression() 
+     * f1 -> ExpressionTail()
+     */
+    @Override
+    public String visit(ExpressionList n, Void argu) throws Exception {
+        String ret = "";
+
+        // Expression
+        String expr = n.f0.accept(this, argu);
+        if (expr == null) {
+            throw new Exception("Invalid null type for expression list");
+        }
+        
+        ret += expr;
+        // Expression tail
+        String tail = n.f1.accept(this, argu);
+        if (tail != null) {
+            ret += ", " + tail;
+        }
+
+        return ret;
+    }
+
+    /**
+     * f0 -> ,
+     * f1 -> Expression()
+     */
+    @Override
+    public String visit(ExpressionTerm n, Void argu) throws Exception {
+        return n.f1.accept(this, argu);
+    }
+
+    /**
+     * f0 -> ( ExpressionTerm() )
+     */
+    @Override
+    public String visit(ExpressionTail n, Void argu) throws Exception {
+        String ret = "";
+
+        // Check if the expression tail is empty
+        if (n.f0.present()) {
+            for (Node node : n.f0.nodes) {
+                ret += node.accept(this, argu) + ", ";
+            }
+            ret = ret.substring(0, ret.length() - 2); // Remove the last comma
+        }
+
+        return ret;
+    }
+
+    /**
+     * f0 -> PrimaryExpression() 
+     * f1 -> "." 
+     * f2 -> Identifier() 
+     * f3 -> "(" 
+     * f4 -> ( ExpressionList() )? 
+     * f5 -> ")"
+     */
+    @Override
+    public String visit(MessageSend n, Void argu) throws Exception {
+        String type = null;
+
+        // Object name
+        String objectType = n.f0.accept(this, argu);
+
+        // Method name
+        String method = n.f2.accept(this, argu);
+
+        // Arguments list
+        String args = n.f4.accept(this, argu);
+        System.err.println("Args: " + args);
+
+        //? Check if the object (it's type) has the method
+        MethodDec methodDec = symbolTable.getClass(objectType).getMethod(method);
+        if (methodDec == null) {
+            throw new Exception("Method " + method + " not found in class " + objectType);
+        }
+        type = methodDec.getReturnType();
+        if (type == null) {
+            throw new Exception("Invalid type for method " + method + " in class " + objectType);
+        }
+
+        // Check if the method has the same number of arguments
+        if (methodDec.getArguments().size() == 0 && args != null) {
+            throw new Exception("Method " + method + " in class " + objectType + " has no arguments");
+        } else if (methodDec.getArguments().size() > 0 && args == null) {
+            throw new Exception("Method " + method + " in class " + objectType + " has arguments");
+        } else if (methodDec.getArguments().size() != 0 && args != null) {
+            String[] argTypes = args.split(", ");
+            if (argTypes.length != methodDec.getArguments().size()) {
+                throw new Exception("Invalid number of arguments for method " + method + " in class " + objectType);
+            }
+        }
+
+        return type;
+    }
+
+    @Override
+    public String visit(Clause n, Void argu) throws Exception {
+        // Clause
+        String clause = n.f0.accept(this, argu);
+
+        // Check if the type is valid
+        if (clause == null) {
+            throw new Exception("Invalid null type for clause");
+        }
+
+        return clause;
+    }
+
     /**
      * f0 -> "new" 
      * f1 -> "boolean" 
@@ -597,31 +705,6 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         return type;
     }
 
-    /**
-     * f0 -> PrimaryExpression() 
-     * f1 -> "." 
-     * f2 -> Identifier() 
-     * f3 -> "(" 
-     * f4 -> ( ExpressionList() )? 
-     * f5 -> ")"
-     */
-    @Override
-    public String visit(MessageSend n, Void argu) throws Exception {
-        // Object name
-        String object = n.f0.accept(this, argu);
-
-        // Method name
-        String method = n.f2.accept(this, argu);
-
-        // Arguments list
-        String args = n.f4.accept(this, argu);
-
-        System.err.println("Object: " + object);
-        System.err.println("Method: " + method);
-        System.err.println("Arguments: " + args);
-
-        return null;
-    }
     @Override
     public String visit(IntegerLiteral n, Void argu) throws Exception {
         int value = Integer.parseInt(n.f0.toString());
@@ -653,6 +736,11 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     public String visit(IntegerType n, Void argu) {
         return "int";
     }
+    @Override
+    public String visit(Identifier n, Void argu) throws Exception {
+        // Identifier name
+        return n.f0.toString();
+    }
 
     // Check for a variable in the symbol table and return its type
     public String lookForId(String name) throws Exception {
@@ -677,25 +765,23 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         }
 
         // Check recursively in the super class
-        String temp = currentClass;
-        ClassDec classTemp = symbolTable.getClass(temp);
-        
-        currentClass = classTemp.getParent();
-        currentClassDec = symbolTable.getClass(currentClass);
-        if (currentClassDec == null) {
-            throw new Exception("Class " + currentClass + " not found in symbol table");
+        if (currentClassDec.getParent() != null) {
+            String temp = currentClass;
+            ClassDec classTemp = symbolTable.getClass(temp);
+            
+            currentClass = classTemp.getParent();
+            currentClassDec = symbolTable.getClass(currentClass);
+            if (currentClassDec == null) {
+                throw new Exception("Class " + currentClass + " not found in symbol table");
+            }
+            String type = lookForId(name);
+
+            currentClass = temp;
+            currentClassDec = classTemp;
+
+            return type;
+        } else {
+            throw new Exception("Class " + currentClass + " does not have a parent");
         }
-        String type = lookForId(name);
-
-        currentClass = temp;
-        currentClassDec = classTemp;
-
-        return type;
-    }
-
-    @Override
-    public String visit(Identifier n, Void argu) throws Exception {
-        // Identifier name
-        return n.f0.toString();
     }
 }

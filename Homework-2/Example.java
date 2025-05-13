@@ -29,6 +29,8 @@ class A {
         k[0] = 1;
         k[1] = 2;
 
+        i = A.foo(1, 2);
+
         return k;
     }
 }
