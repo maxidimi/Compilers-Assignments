@@ -12,7 +12,7 @@ class A {
     public int foo(int i, int j) {
         int k;
         {
-            k = 1;
+            k = l.length;
         }
         k = l[1];
 
@@ -21,6 +21,15 @@ class A {
 
     public int bar() { 
         return 1;
+    }
+
+    public int[] retArr() {
+        int[] k;
+        k = new int[1+1];
+        k[0] = 1;
+        k[1] = 2;
+
+        return k;
     }
 }
 

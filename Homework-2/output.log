@@ -14,41 +14,45 @@ Classes in the symbol table:
 			bar --> int (offset: 8)
 				Arguments:
 				Variables:
+			retArr --> int[] (offset: 16)
+				Arguments:
+				Variables:
+					k == int[]
 		Var Offset: 20
-		Method Offset: 16
+		Method Offset: 24
 
 	Class: B (extends A)
 		Fields: 
 			i --> int (offset: 20)
 		Methods: 
-			foo --> int (offset: 16)
+			foo --> int (offset: 24)
 				Arguments:
 					i == int
 					j == int
 				Variables:
 					k == boolean[]
-			foobar --> int (offset: 24)
+			foobar --> int (offset: 32)
 				Arguments:
 					k == boolean
 				Variables:
 		Var Offset: 24
-		Method Offset: 32
+		Method Offset: 40
 
 	Class: C (extends B)
 		Fields: 
 			i --> int (offset: 24)
 			k --> int[] (offset: 28)
 		Methods: 
-			foo --> int (offset: 32)
+			foo --> int (offset: 40)
 				Arguments:
 					i == int
 					j == int
 				Variables:
-			foobar --> int (offset: 40)
+			foobar --> int (offset: 48)
 				Arguments:
 					k == boolean
 				Variables:
-			threepar --> int[] (offset: 48)
+			threepar --> int[] (offset: 56)
 				Arguments:
 					i == int
 					j == int
@@ -57,7 +61,7 @@ Classes in the symbol table:
 				Variables:
 					m == int[]
 		Var Offset: 36
-		Method Offset: 56
+		Method Offset: 64
 
 	Class: Example
 		Fields: 
@@ -69,4 +73,3 @@ Classes in the symbol table:
 		Var Offset: 0
 		Method Offset: 8
 
-Type checking completed successfully!
