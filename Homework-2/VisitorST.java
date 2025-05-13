@@ -274,17 +274,15 @@ class VisitorST extends GJDepthFirst<String, Void>{
     }
 
     /**
-     * f0 -> FormalParameter()
+     * f0 -> ,
      * f1 -> FormalParameterTail()
      */
     public String visit(FormalParameterTerm n, Void argu) throws Exception {
-        //? f0
         return n.f1.accept(this, argu);
     }
 
     /**
-     * f0 -> ","
-     * f1 -> FormalParameter()
+     * f0 -> ( FormalParameterTerm() )
      */
     @Override
     public String visit(FormalParameterTail n, Void argu) throws Exception {

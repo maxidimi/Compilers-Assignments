@@ -230,18 +230,16 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     }
 
     /**
-     * f0 -> FormalParameter()
+     * f0 -> ,
      * f1 -> FormalParameterTail()
      */
     @Override
     public String visit(FormalParameterTerm n, Void argu) throws Exception {
-        //? f0
         return n.f1.accept(this, argu);
     }
 
     /**
-     * f0 -> ","
-     * f1 -> FormalParameter()
+     * f0 -> ( FormalParameterTerm() )
      */
     @Override
     public String visit(FormalParameterTail n, Void argu) throws Exception {
@@ -460,10 +458,10 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     @Override
     public String visit(CompareExpression n, Void argu) throws Exception {
         // Left expression
-        String left = n.f0.accept(this, argu);
+        String left = checkForId(n.f0.accept(this, argu));
 
         // Right expression
-        String right = n.f2.accept(this, argu);
+        String right = checkForId(n.f2.accept(this, argu));
 
         // Check if the types are valid
         if ((left == null) || (right == null) || !left.equals("int") || !right.equals("int")) {
@@ -481,10 +479,10 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     @Override
     public String visit(PlusExpression n, Void argu) throws Exception {
         // Left expression
-        String left = n.f0.accept(this, argu);
+        String left = checkForId(n.f0.accept(this, argu));
 
         // Right expression
-        String right = n.f2.accept(this, argu);
+        String right = checkForId(n.f2.accept(this, argu));
 
         // Check if the types are valid
         if ((left == null) || (right == null) || !left.equals("int") || !right.equals("int")) {
@@ -501,10 +499,10 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     @Override
     public String visit(MinusExpression n, Void argu) throws Exception {
         // Left expression
-        String left = n.f0.accept(this, argu);
+        String left = checkForId(n.f0.accept(this, argu));
 
         // Right expression
-        String right = n.f2.accept(this, argu);
+        String right = checkForId(n.f2.accept(this, argu));
 
         // Check if the types are valid
         if ((left == null) || (right == null) || !left.equals("int") || !right.equals("int")) {
@@ -521,10 +519,10 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     @Override
     public String visit(TimesExpression n, Void argu) throws Exception {
         // Left expression
-        String left = n.f0.accept(this, argu);
+        String left = checkForId(n.f0.accept(this, argu));
 
         // Right expression
-        String right = n.f2.accept(this, argu);
+        String right = checkForId(n.f2.accept(this, argu));
 
         // Check if the types are valid
         if ((left == null) || (right == null) || !left.equals("int") || !right.equals("int")) {
@@ -546,7 +544,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         String arrayType = checkForId(n.f0.accept(this, argu));
 
         // Index type
-        String index = n.f2.accept(this, argu);System.err.println("Array type: " + arrayType);
+        String index = checkForId(n.f2.accept(this, argu));
 
         // Check if the types are valid
         if ((arrayType == null) || (index == null) || !arrayType.equals("int[]") || !index.equals("int")) {
@@ -564,10 +562,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     @Override
     public String visit(ArrayLength n, Void argu) throws Exception {
         // Array
-        String arrayName = n.f0.accept(this, argu);
-
-        //? Find the array type
-        String array = lookForId(arrayName);
+        String array = checkForId(n.f0.accept(this, argu));
 
         // Check if the type is valid
         if ((array == null) || !array.equals("int[]") && !array.equals("boolean[]")) {
@@ -693,17 +688,12 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         return type;
     }
 
+    /**
+     * f0 -> NotExpression() | PrimaryExpression()
+     */
     @Override
     public String visit(Clause n, Void argu) throws Exception {
-        // Clause
-        String clause = n.f0.accept(this, argu);
-
-        // Check if the type is valid
-        if (clause == null) {
-            throw new Exception("Invalid null type for clause");
-        }
-
-        return clause;
+        return checkForId(n.f0.accept(this, argu));
     }
 
     /**

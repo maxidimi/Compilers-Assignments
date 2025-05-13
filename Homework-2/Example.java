@@ -9,7 +9,12 @@ class A {
 
     public A foo(A x){
 
-        int x;
+        int[] a;
+        boolean d;
+        int b;
+        d = true && false;
+        b = a.length;
+        b = a[(1+b)];
 
         return this;
     }
