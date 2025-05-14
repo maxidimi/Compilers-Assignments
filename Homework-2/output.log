@@ -1,62 +1,31 @@
-Object type: B
-Method type: boolean
-Object type: C
-Method type: boolean
-Object type: B
-Method type: int
-Object type: C
-Method type: int
-Object type: B
-Method type: int
-Object type: C
-Method type: boolean
 Classes in the symbol table:
 	Class: A
 		Fields: 
 		Methods: 
-			getArr --> int[] (offset: 0)
+			foo --> A (offset: 0)
 				Arguments:
-					c3 == B
-					c1 == B
-					c2 == B
+					x == A
+				Variables:
+			bar --> A (offset: 8)
+				Arguments:
+					x == A
+					y == A
 				Variables:
 		Var Offset: 0
-		Method Offset: 8
+		Method Offset: 16
 
-	Class: test03
+	Class: test01
 		Fields: 
 		Methods: 
 			main --> void (offset: 0)
 				Arguments:
-					x == String[]
+					args == String[]
 				Variables:
+					result == A
 					a == A
-					b == B
-					c == C
-					rv == boolean
+					b == A
+					c == A
 		Var Offset: 0
 		Method Offset: 8
-
-	Class: B
-		Fields: 
-			obj --> C (offset: 0)
-		Methods: 
-			set --> boolean (offset: 0)
-				Arguments:
-				Variables:
-			get --> int (offset: 8)
-				Arguments:
-				Variables:
-					arr == int[]
-					test == B
-					i == int
-		Var Offset: 8
-		Method Offset: 16
-
-	Class: C (extends B)
-		Fields: 
-		Methods: 
-		Var Offset: 8
-		Method Offset: 16
 
 Type checking completed successfully!

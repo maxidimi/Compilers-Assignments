@@ -410,8 +410,10 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         if ((var == null) || (expr == null)) {
             throw new Exception("Invalid types for assignment: " + var + " and " + expr);
         } else if (!var.equals(expr)) { // Check if the types are the same
-            //? Subtyping
-
+            // Subtyping
+            if (!isSubtype(var, expr)) {
+                throw new Exception("Invalid types for assignment: " + var + " and " + expr);
+            }
         }
 
         return null;
@@ -699,45 +701,43 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         String type = null;
 
         // Object name
-        String objectType = checkForId(n.f0.accept(this, argu));System.out.println("Object type: " + objectType);
+        String objectType = checkForId(n.f0.accept(this, argu));
 
         // Method name
         String method = n.f2.accept(this, argu);
 
         // Arguments list - their types (if not null)
-        String args = n.f4.accept(this, argu);
+        String inputArgsTypes = n.f4.accept(this, argu);
 
         // Check if the object (it's type) has the method
         MethodDec methodDec = lookForMethod(method, objectType);
-        type = methodDec.getReturnType();System.out.println("Method type: " + type);
+        type = methodDec.getReturnType();
 
         // Check if the method has the same number of arguments
-        if (methodDec.getArguments().size() == 0 && args != null) {
+        if ((methodDec.getArguments().size() == 0) && (inputArgsTypes != null)) {
             throw new Exception("Method " + method + " in class " + objectType + " has no arguments");
-
-        } else if (methodDec.getArguments().size() > 0 && args == null) {
+        } else if ((methodDec.getArguments().size() > 0) && (inputArgsTypes == null)) {
             throw new Exception("Method " + method + " in class " + objectType + " has arguments");
-
-        } else if (methodDec.getArguments().size() != 0 && args != null) { // Check that the types are correct
-            // Split the call arguments
-            String[] argTypes = args.split(", ");
+        // Check that the types are correct
+        } else if ((methodDec.getArguments().size() != 0) && (inputArgsTypes != null)) {
+            // Split the call's argument types
+            String[] argTypes = inputArgsTypes.split(", ");
             if (argTypes.length != methodDec.getArguments().size()) { // Check that call has the correct number of arguments
                 throw new Exception("Invalid number of arguments for method " + method + " in class " + objectType);
             }
 
             // Get the proper types
-            String[] argTypesList = new String[methodDec.getArguments().size()];
+            String[] correctArgsTypes = new String[methodDec.getArguments().size()];
             int i = 0;
             for (VariableDec arg : methodDec.getArguments().values()) {
-                argTypesList[i] = arg.getType();
-                i++;
+                correctArgsTypes[i++] = arg.getType();
             }
 
             // Check that the types are correct
             for (i = 0; i < argTypes.length; i++) {
                 String argType = argTypes[i].trim();
-                if (!argType.equals(argTypesList[i])) {
-                    throw new Exception("Invalid type for argument " + (i + 1) + " of method " + method + " in class " + objectType);
+                if (!argType.equals(correctArgsTypes[i]) && !isSubtype(correctArgsTypes[i], argType)) {
+                    throw new Exception("Invalid type for argument " + (i + 1) + " of method " + method + " in class " + objectType + ": " + argType + (" instead of " + correctArgsTypes[i]));
                 }
             }
         }
@@ -901,5 +901,19 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         }
 
         return name;
+    }
+
+    // A a = new B(); where B extends A
+    public boolean isSubtype(String A, String B) throws Exception {
+        // Check if class1 is a subclass of class2
+        ClassDec classTemp = symbolTable.getClass(B);
+        // Check recursively in the super class(es)
+        while (classTemp.hasParent()) {
+            if (classTemp.getParent().equals(A)) {
+                return true;
+            }
+            classTemp = symbolTable.getClass(classTemp.getParent());
+        }
+        return false;
     }
 }
