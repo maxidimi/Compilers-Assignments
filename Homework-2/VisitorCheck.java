@@ -407,8 +407,11 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         String expr = checkForId(n.f2.accept(this, argu));
 
         // Check if the types are valid
-        if ((var == null) || (expr == null) || !var.equals(expr)) {
+        if ((var == null) || (expr == null)) {
             throw new Exception("Invalid types for assignment: " + var + " and " + expr);
+        } else if (!var.equals(expr)) { // Check if the types are the same
+            //? Subtyping
+
         }
 
         return null;
@@ -470,7 +473,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         if (currentClass == null) {
             throw new Exception("Invalid this expression: " + n.f0.toString());
         }
-
+        // "this" has the same type as the current class
         return currentClass;
     }
 
@@ -696,20 +699,17 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         String type = null;
 
         // Object name
-        String objectType = checkForId(n.f0.accept(this, argu));
+        String objectType = checkForId(n.f0.accept(this, argu));System.out.println("Object type: " + objectType);
 
         // Method name
         String method = n.f2.accept(this, argu);
 
-        // Arguments list
+        // Arguments list - their types (if not null)
         String args = n.f4.accept(this, argu);
 
         // Check if the object (it's type) has the method
-        MethodDec methodDec = symbolTable.getClass(objectType).getMethod(method);
-        type = methodDec.getReturnType();
-        if (type == null) {
-            throw new Exception("Invalid type for method " + method + " in class " + objectType);
-        }
+        MethodDec methodDec = lookForMethod(method, objectType);
+        type = methodDec.getReturnType();System.out.println("Method type: " + type);
 
         // Check if the method has the same number of arguments
         if (methodDec.getArguments().size() == 0 && args != null) {
@@ -796,25 +796,11 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
         return "int[]";
     }
-    /**
-     * f0 -> BooleanArrayAllocationExpression() | IntegerArrayAllocationExpression()
-     */
-    @Override
-    public String visit(ArrayAllocationExpression n, Void argu) throws Exception {
-        String type = n.f0.accept(this, argu);
-
-        if (type == null) {
-            throw new Exception("Invalid type for array allocation: " + type);
-        }
-
-        return type;
-    }
 
     @Override
     public String visit(IntegerLiteral n, Void argu) throws Exception {
         int value = Integer.parseInt(n.f0.toString());
-        zeroArraylength = (value == 0); // Used to check if the array length is zero
-
+        zeroArraylength = (value == 0); // Flag to check if the array length is zero
         return "int";
     }
     @Override
@@ -869,8 +855,8 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
             throw new Exception("Current class is null");
         }
 
-        // Check recursively in the super class
-        if (currentClassDec.getParent() != null) {
+        // Check recursively in the super class(es)
+        if (currentClassDec.hasParent()) {
             String temp = currentClass;
             ClassDec classTemp = symbolTable.getClass(temp);
             
@@ -884,6 +870,23 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
             return type;
         } else {
             throw new Exception("Can't find symbol " + name);
+        }
+    }
+
+    public MethodDec lookForMethod(String method, String className) throws Exception {
+        // Check if the method is in the input class
+        ClassDec classTemp = symbolTable.getClass(className);
+        MethodDec methodDec = symbolTable.getClass(className).getMethod(method);
+        if (methodDec != null) {
+            return methodDec;
+        }
+        // Check recursively in the super class(es)
+        if (symbolTable.getClass(className).hasParent()) {
+            className = classTemp.getParent();
+            methodDec = lookForMethod(method, className);
+            return methodDec;
+        } else {
+            throw new Exception("Can't find method " + method + " in class " + className);
         }
     }
 
