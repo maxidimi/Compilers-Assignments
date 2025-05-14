@@ -31,6 +31,7 @@ class VisitorST extends GJDepthFirst<String, Void>{
         // Main class name
         String mainClassName = n.f1.accept(this, null);
         currentClass = mainClassName;
+        symbolTable.mainClassName = mainClassName;
 
         // Create main class & add it to the symbol table
         ClassDec mainClass = new ClassDec(mainClassName, null);
@@ -159,10 +160,21 @@ class VisitorST extends GJDepthFirst<String, Void>{
         String myName = n.f2.accept(this, null);
         currentMethod = myName;
 
-        // Add the method to the current class
+        // Check for overriding & then add the method to the current class
         MethodDec methodDec = new MethodDec(myName, myType);
         ClassDec classDec = symbolTable.classes.get(currentClass);
         if (classDec != null) {
+            // In this phase, we don't need to check if the signatures are same, just that a method with the same name exists in the parent(s) class
+            if (classDec.hasParent()) {
+                ClassDec tmpClass = classDec;
+                while (tmpClass.hasParent()) {
+                    tmpClass = symbolTable.getClass(tmpClass.getParent());
+                    if (tmpClass.hasMethod(myName)) {
+                        methodDec.setOverriding(true);
+                        break;
+                    }
+                }
+            }
             classDec.setMethod(methodDec);
         } else {
             throw new Exception("Class " + currentClass + " not found in symbol table");

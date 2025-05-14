@@ -28,37 +28,27 @@ public class Main {
                 root.accept(check, null);
 
                 // For each class in the symbol table print its name
-                System.out.println("Classes in the symbol table:");
                 symbolTable.classes.forEach((k, v) -> {
+                    if (k == symbolTable.mainClassName) {
+                        return; // Skip the main class
+                    }
 
-                    System.out.println("\tClass: " + k + (v.parent != null ? " (extends " + v.parent + ")" : ""));
+                    System.out.println("-----------Class " + k + "-----------");
 
-                    System.out.println("\t\tFields: ");
+                    System.out.println("--Variables---");
                     for (String field : v.fields.keySet()) {
-                        System.out.println("\t\t\t" + field + " --> " + v.fields.get(field).type + " (offset: " + v.fields.get(field).offset + ")");
+                        System.out.println(k + "." + field + " : " + v.fields.get(field).offset);
                     }
 
-                    System.out.println("\t\tMethods: ");
+                    System.out.println("---Methods---");
                     for (String method : v.methods.keySet()) {
-                        System.out.println("\t\t\t" + method + " --> " + v.methods.get(method).returnType + " (offset: " + v.methods.get(method).offset + ")");
-
-                        System.out.println("\t\t\t\tArguments:");
-                        for (String arg : v.methods.get(method).arguments.keySet()) {
-                            System.out.println("\t\t\t\t\t" + arg + " == " + v.methods.get(method).arguments.get(arg).type);
-                        }
-
-                        System.out.println("\t\t\t\tVariables:");
-                        for (String var : v.methods.get(method).variables.keySet()) {
-                            System.out.println("\t\t\t\t\t" + var + " == " + v.methods.get(method).variables.get(var).type);
+                        //if method not overriding
+                        if (!v.methods.get(method).isOverriding) {
+                            System.out.println(k + "." + method + " : " + v.methods.get(method).offset);
                         }
                     }
-
-                    System.out.println("\t\tVar Offset: " + v.varOffset);
-                    System.out.println("\t\tMethod Offset: " + v.methodOffset);
                     System.out.println();
                 });
-
-                System.out.println("Type checking completed successfully!");
             }
             catch(ParseException ex){
                 System.out.println(ex.getMessage());

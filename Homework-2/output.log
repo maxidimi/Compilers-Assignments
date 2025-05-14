@@ -1,31 +1,11 @@
-Classes in the symbol table:
-	Class: A
-		Fields: 
-		Methods: 
-			foo --> A (offset: 0)
-				Arguments:
-					x == A
-				Variables:
-			bar --> A (offset: 8)
-				Arguments:
-					x == A
-					y == A
-				Variables:
-		Var Offset: 0
-		Method Offset: 16
+-----------Class Base-----------
+--Variables---
+Base.data : 0
+---Methods---
+Base.set : 0
+Base.get : 8
 
-	Class: test01
-		Fields: 
-		Methods: 
-			main --> void (offset: 0)
-				Arguments:
-					args == String[]
-				Variables:
-					result == A
-					a == A
-					b == A
-					c == A
-		Var Offset: 0
-		Method Offset: 8
+-----------Class Derived-----------
+--Variables---
+---Methods---
 
-Type checking completed successfully!

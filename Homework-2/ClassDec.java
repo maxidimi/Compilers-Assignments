@@ -113,7 +113,9 @@ class ClassDec {
         method.classInto = this; // Set the class that contains the method
 
         // Update the offset
-        method.setOffset(methodOffset);
-        methodOffset += 8;
+        if (!method.isOverriding()) {
+            method.setOffset(methodOffset);
+            methodOffset += 8;
+        }
     }
 }

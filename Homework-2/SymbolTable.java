@@ -1,4 +1,4 @@
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 // The Symbol Table
@@ -6,14 +6,16 @@ class SymbolTable {
     
     // Store the classes in the symbol table - their variables and methods
     Map<String, ClassDec> classes;
+    String mainClassName;
 
     SymbolTable() {
-        classes = new HashMap<>();
+        classes = new LinkedHashMap<>();
+        mainClassName = null;
     }
 
     // Getters
     public ClassDec getClass(String name) throws Exception {
-        //? Check if the class exists
+        // Check if the class exists
         if (!classes.containsKey(name)) {
             throw new Exception("Class " + name + " does not exist");
         }

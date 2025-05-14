@@ -735,9 +735,9 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
             // Check that the types are correct
             for (i = 0; i < argTypes.length; i++) {
-                String argType = argTypes[i].trim();
-                if (!argType.equals(correctArgsTypes[i]) && !isSubtype(correctArgsTypes[i], argType)) {
-                    throw new Exception("Invalid type for argument " + (i + 1) + " of method " + method + " in class " + objectType + ": " + argType + (" instead of " + correctArgsTypes[i]));
+                String inpArgType = argTypes[i].trim();
+                if (!inpArgType.equals(correctArgsTypes[i]) && !isSubtype(correctArgsTypes[i], inpArgType)) {
+                    throw new Exception("Invalid type for argument " + (i + 1) + " of method " + method + " in class " + objectType + ": " + inpArgType + (" instead of " + correctArgsTypes[i]));
                 }
             }
         }
@@ -800,7 +800,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     @Override
     public String visit(IntegerLiteral n, Void argu) throws Exception {
         int value = Integer.parseInt(n.f0.toString());
-        zeroArraylength = (value == 0); // Flag to check if the array length is zero
+        //?zeroArraylength = (value == 0); // Flag to check if the array length is zero
         return "int";
     }
     @Override

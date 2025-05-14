@@ -22,11 +22,15 @@ class MethodDec {
     // Offset in the stack
     int offset;
 
+    // Overriding method flag
+    boolean isOverriding;
+
     MethodDec(String name, String returnType) {
         this.name = name;
         this.returnType = returnType;
         this.classInto = null;
         this.offset = 0;
+        this.isOverriding = false;
         this.variables = new HashMap<>();
         this.arguments = new HashMap<>();
     }
@@ -46,6 +50,10 @@ class MethodDec {
 
     public int getOffset() {
         return offset;
+    }
+
+    public boolean isOverriding() {
+        return isOverriding;
     }
 
     public Map<String, VariableDec> getArguments() {
@@ -99,5 +107,9 @@ class MethodDec {
 
         // Add a variable to the method
         variables.put(name, new VariableDec(name, type));
+    }
+
+    public void setOverriding(boolean isOverriding) {
+        this.isOverriding = isOverriding;
     }
 }

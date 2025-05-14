@@ -1,20 +1,29 @@
-class test01 {
-  public static void main(String[] args) {
-    A a;
-    A b;
-    A c;
-    A result;
-    a = new A();
-    b = new A();
-    c = new A();
-
-    result = (a.bar(a.foo(b), c));
-
-    result = (( result.foo(b.bar(b, a.foo(c)))).bar(result, a.foo(a)));
-  }
+class Classes {
+	public static void main(String[] a) {
+		Base b;
+		Derived d;
+  		b = new Base();
+ 		d = new Derived();
+		b = d;
+		System.out.println(b.set(1));
+		System.out.println(b.set(3));
+	}
 }
 
-class A {
-  public A foo(A x) { return x; }
-  public A bar(A x, A y) { return x.foo(y); }
+class Base {
+	int data;
+	public int set(int x) {
+		data = x;
+		return data;
+	}
+	public int get() {
+		return data;
+	}
+}
+
+class Derived extends Base {
+	public int set(int x) {
+		data = x * 2;
+		return data;
+	}
 }
