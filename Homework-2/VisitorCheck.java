@@ -2,26 +2,16 @@ import syntaxtree.*;
 import visitor.*;
 
 class VisitorCheck extends GJDepthFirst<String, Void>{
-    
-    // The symbol table
+    // Variables that help in type checking
     SymbolTable symbolTable;
-
-    Boolean inVarDecleration;
-
     String currentClass;
     String currentMethod;
-
     ClassDec currentClassDec;
     MethodDec currentMethodDec;
-
     boolean zeroArraylength;
-
-    String varId;
-    String varType;
 
     VisitorCheck(SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
-        this.inVarDecleration = false;
         this.currentClass = null;
         this.currentMethod = null;
         this.currentClassDec = null;
@@ -29,20 +19,17 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         this.zeroArraylength = false;
     }
 
-    public boolean isValidType(String type) {
-        // Check if the type is valid
-        if (type == null) {
-            return false;
-        } else if (type.equals("int") || type.equals("boolean") || type.equals("int[]") || type.equals("boolean[]") || symbolTable.classExists(type)) {
-            return true;
-        } else {
+    // Check if the type is valid - int, boolean, int[], boolean[] or a defined class
+    public boolean isValidType(String type) {    
+        if (type == null || !(type.equals("int") || type.equals("boolean") || type.equals("int[]") || type.equals("boolean[]") || symbolTable.classExists(type))) {
             return false;
         }
+        return true;
     }
 
     /**
-     * f1 -> Identifier()
-     * f11 -> Identifier()
+     * f1 -> Identifier() = main class name
+     * f11 -> Identifier() = command line arguments String[]
      * f14 -> ( VarDeclaration() )*
      * f15 -> ( Statement() )*
      */
@@ -50,22 +37,22 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     public String visit(MainClass n, Void argu) throws Exception {
         // Main class name
         String mainClassName = n.f1.accept(this, null);
+
+        // Get main class & method
         currentClass = mainClassName;
         currentClassDec = symbolTable.getClass(mainClassName);
-        if (currentClassDec == null) {
-            throw new Exception("Class " + mainClassName + " not found in symbol table");
-        }
+        currentMethod = "main";
+        currentMethodDec = symbolTable.getClass(mainClassName).getMethod("main");
 
         // Declerations
         n.f14.accept(this, null);
-        currentMethod = "main";
-        currentMethodDec = symbolTable.getClass(mainClassName).getMethod("main");
-        if (currentMethodDec == null) {
-            throw new Exception("Method main not found in symbol table, class " + mainClassName);
-        }
 
         // Statements
         n.f15.accept(this, null);
+
+        // Reset current class and method
+        currentClass = null;
+        currentClassDec = null;
 
         return null;
     }
@@ -84,9 +71,6 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         String classname = n.f1.accept(this, argu);
         currentClass = classname;
         currentClassDec = symbolTable.getClass(classname);
-        if (currentClassDec == null) {
-            throw new Exception("Class " + classname + " not found in symbol table");
-        }
         
         // Fields
         n.f3.accept(this, argu);
@@ -117,9 +101,6 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         String classname = n.f1.accept(this, null);
         currentClass = classname;
         currentClassDec = symbolTable.getClass(classname);
-        if (currentClassDec == null) {
-            throw new Exception("Class " + classname + " not found in symbol table");
-        }
 
         // Fields
         n.f5.accept(this, argu);
@@ -132,29 +113,6 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         currentClassDec = null;
 
         return null;
-    }
-
-    /**
-    * f0 -> Type()
-    * f1 -> Identifier()
-    * f2 -> ";"
-    */
-    @Override
-    public String visit(VarDeclaration n, Void argu) throws Exception {
-        String _ret=null;
-
-        // Type of the variable
-        String type = n.f0.accept(this, argu);
-
-        // Name of the variable
-        String var = n.f1.accept(this, argu);
-
-        // Check if the type is valid
-        if (!isValidType(type)) {
-            throw new Exception("Invalid type " + type + " for variable " + var);
-        }
-        
-        return _ret;
     }
 
     /**
@@ -181,35 +139,87 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         String myName = n.f2.accept(this, null);
         currentMethod = myName;
         currentMethodDec = symbolTable.getClass(currentClass).getMethod(myName);
-        if (currentMethodDec == null) {
-            throw new Exception("Method " + myName + " not found in symbol table, class " + currentClass);
-        }
         
-        // Arguments list
+        //? Arguments list
         String argumentList = n.f4.accept(this, argu);
 
         // Variables
-        inVarDecleration = true;
         n.f7.accept(this, argu);
-        inVarDecleration = false;
 
         // Statements
         n.f8.accept(this, argu);
 
         // Return expression
-        String returnType = n.f10.accept(this, argu);
-        // Check if the return type is valid
-        if (returnType != null && !isValidType(returnType)) {
-            returnType = lookForId(returnType);
-        }
+        String returnType = checkForId(n.f10.accept(this, argu));
 
         // Check if the return type is same as in the signature
         if (!returnType.equals(myType)) {
             throw new Exception("Invalid return type for method " + myName + ": " + returnType + (" instead of " + myType) + " in class " + currentClass);
         }
 
+        // Check for overriding - if exists, method must have same argument types and return type
+        if (currentClassDec.hasParent()) {
+            ClassDec parentClass = symbolTable.getClass(currentClassDec.getParent());
+            
+            if (parentClass.hasMethod(myName)) {
+                MethodDec parentMethod = parentClass.getMethod(myName);
+
+                // Check if the return type is same as in the signature
+                if (!parentMethod.getReturnType().equals(myType)) {
+                    throw new Exception("Invalid return type for method " + myName + ": " + returnType + (" instead of " + myType) + " in class " + currentClass);
+                }
+
+                // Check for arguments
+                String[] argTypes = argumentList.split(", ");
+                if (argTypes.length != parentMethod.getArguments().size()) {
+                    throw new Exception("Invalid number of arguments for method " + myName + ": " + argTypes.length + (" instead of " + parentMethod.getArguments().size()) + " in class " + currentClass);
+                }
+
+                // Get the proper types
+                String[] argTypesList = new String[parentMethod.getArguments().size()];
+                int i = 0;
+                for (VariableDec arg : parentMethod.getArguments().values()) {
+                    argTypesList[i] = arg.getType();
+                    i++;
+                }
+
+                // Check that the types are correct
+                for (i = 0; i < argTypes.length; i++) {
+                    String argType = argTypes[i].trim();
+                    // Get 1st part of the type
+                    if (argType.contains(" ")) {
+                        argType = argType.split(" ")[0];
+                    }
+                    if (!argType.equals(argTypesList[i])) {
+                        throw new Exception("Invalid type for argument " + (i + 1) + " of method " + myName + ": " + argType + (" instead of " + argTypesList[i]) + " in class " + currentClass);
+                    }
+                }
+            }
+        }
+
         // Reset current method
         currentMethod = null;
+        currentMethodDec = null;
+        
+        return null;
+    }
+
+    /**
+    * f0 -> Type()
+    * f1 -> Identifier()
+    * f2 -> ";"
+    */
+    @Override
+    public String visit(VarDeclaration n, Void argu) throws Exception {// Type of the variable
+        String type = n.f0.accept(this, argu);
+
+        // Name of the variable
+        String var = n.f1.accept(this, argu);
+
+        // Check if the type is valid
+        if (!isValidType(type)) {
+            throw new Exception("Invalid type " + type + " for variable " + var);
+        }
         
         return null;
     }
@@ -278,6 +288,56 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         String type = checkForId(n.f1.accept(this, argu));
 
         return type;
+    }
+
+    /**
+     * f0 -> "if" 
+     * f1 -> "(" 
+     * f2 -> Expression() 
+     * f3 -> ")" 
+     * f4 -> Statement() 
+     * f5 -> "else" 
+     * f6 -> Statement()
+     */
+    @Override
+    public String visit(IfStatement n, Void argu) throws Exception {
+        // Condition
+        String condition = checkForId(n.f2.accept(this, argu));
+
+        // Check if the type is valid
+        if (!condition.equals("boolean")) {
+            throw new Exception("Invalid type " + condition + " for if statement");
+        }
+
+        // Then statement
+        n.f4.accept(this, argu);
+
+        // Else statement
+        n.f6.accept(this, argu);
+
+        return null;
+    }
+    /**
+     * f0 -> "while" 
+     * f1 -> "(" 
+     * f2 -> Expression() 
+     * f3 -> ")" 
+     * f4 -> Statement()
+     */
+    @Override
+    public String visit(WhileStatement n, Void argu) throws Exception {
+        // Condition
+        String condition = checkForId(n.f2.accept(this, argu));
+
+        // Check if the type is valid
+        if (!condition.equals("boolean")) {
+            throw new Exception("Invalid type " + condition + " for while statement");
+        }
+
+        // Statement
+        n.f4.accept(this, argu);
+
+        return null;
     }
 
     /**
@@ -646,9 +706,6 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
         // Check if the object (it's type) has the method
         MethodDec methodDec = symbolTable.getClass(objectType).getMethod(method);
-        if (methodDec == null) {
-            throw new Exception("Method " + method + " not found in class " + objectType);
-        }
         type = methodDec.getReturnType();
         if (type == null) {
             throw new Exception("Invalid type for method " + method + " in class " + objectType);
@@ -819,9 +876,6 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
             
             currentClass = classTemp.getParent();
             currentClassDec = symbolTable.getClass(currentClass);
-            if (currentClassDec == null) {
-                throw new Exception("Class " + currentClass + " not found in symbol table");
-            }
             String type = lookForId(name);
 
             currentClass = temp;
@@ -829,7 +883,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
             return type;
         } else {
-            throw new Exception("Class " + currentClass + " does not have a parent");
+            throw new Exception("Can't find symbol " + name);
         }
     }
 

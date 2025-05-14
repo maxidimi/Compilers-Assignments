@@ -1,23 +1,24 @@
-class DoubleDeclaration1 {
-
-    public static void main(String[] args) {}
-
+class Main {
+	public static void main(String[] a) {}
 }
 
+class Base {
+	int data;
+	public int get(int y) {
+		return data;
+	}
+}
 
-class A {
+class Derived extends Base {
+    int i;
+	public int get(int x) {
+        i = 12;
+        if (i < 12) {
+            i = A.get(x);
+        } else {
+            i = 0;
+        }
 
-    public A foo(A x){
-
-        int[] a;
-        boolean d;
-        int b;
-        d = true && false;
-        b = a.length;
-        b = a[(1+b)];
-
-        return this;
-    }
-
-
+		return x;
+	}
 }

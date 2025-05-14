@@ -12,7 +12,11 @@ class SymbolTable {
     }
 
     // Getters
-    public ClassDec getClass(String name) {
+    public ClassDec getClass(String name) throws Exception {
+        //? Check if the class exists
+        if (!classes.containsKey(name)) {
+            throw new Exception("Class " + name + " does not exist");
+        }
         return classes.get(name);
     }
 

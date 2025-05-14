@@ -39,6 +39,10 @@ class ClassDec {
         return parent;
     }
 
+    public boolean hasParent() {
+        return parent != null;
+    }
+
     public int getVarOffset() {
         return varOffset;
     }
@@ -61,6 +65,10 @@ class ClassDec {
 
     public Map<String, MethodDec> getMethods() {
         return methods;
+    }
+
+    public boolean hasMethod(String name) {
+        return methods.containsKey(name);
     }
 
     // Setters
