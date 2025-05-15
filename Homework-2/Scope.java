@@ -1,4 +1,0 @@
-// Current scope
-class Scope {
-    
-}
