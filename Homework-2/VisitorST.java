@@ -119,7 +119,13 @@ class VisitorST extends GJDepthFirst<String, Void>{
         ClassDec parentClass = symbolTable.getClass(parent);
 
         // Create class & add it to the symbol table
-        symbolTable.setClass(new ClassDec(classname, parentClass));
+        ClassDec classDec = new ClassDec(classname, parentClass);
+        symbolTable.setClass(classDec);
+
+        // If extends main class, don't add "main" as offset to methods
+        if (parent == mainClassName) {
+            classDec.setMethodOffset(0); // Reset method offset
+        }
 
         // Field declarations
         n.f5.accept(this, argu);

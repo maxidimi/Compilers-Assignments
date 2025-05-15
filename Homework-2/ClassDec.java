@@ -94,4 +94,8 @@ class ClassDec {
             methodOffset += 8;
         }
     }
+
+    public void setMethodOffset(int offset) {
+        this.methodOffset = offset;
+    }
 }
