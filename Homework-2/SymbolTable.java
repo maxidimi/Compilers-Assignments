@@ -22,7 +22,7 @@ class SymbolTable {
         return classes.get(name);
     }
 
-    public boolean classExists(String name) {
+    public boolean hasClass(String name) {
         return classes.containsKey(name);
     }
 

@@ -19,7 +19,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
     // Check if the type is valid - int, boolean, int[], boolean[] or a defined class
     public boolean isValidType(String type) {    
-        if (type == null || !(type.equals("int") || type.equals("boolean") || type.equals("int[]") || type.equals("boolean[]") || symbolTable.classExists(type))) {
+        if (type == null || !(type.equals("int") || type.equals("boolean") || type.equals("int[]") || type.equals("boolean[]") || symbolTable.hasClass(type))) {
             return false;
         }
         return true;
