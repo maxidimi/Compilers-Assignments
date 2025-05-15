@@ -45,24 +45,12 @@ class MethodDec {
         return returnType;
     }
 
-    public ClassDec getClassInto() {
-        return classInto;
-    }
-
-    public int getOffset() {
-        return offset;
-    }
-
     public boolean isOverriding() {
         return isOverriding;
     }
 
     public Map<String, VariableDec> getArguments() {
         return arguments;
-    }
-
-    public Map<String, VariableDec> getVariables() {
-        return variables;
     }
 
     public VariableDec getVariableOrArgument(String name) {
@@ -83,6 +71,10 @@ class MethodDec {
     // Setters
     public void setOffset(int offset) {
         this.offset = offset;
+    }
+
+    public void setOverriding(boolean isOverriding) {
+        this.isOverriding = isOverriding;
     }
 
     public void setArgument(String name, String type) throws Exception {
@@ -108,9 +100,5 @@ class MethodDec {
 
         // Add a variable to the method
         variables.put(name, new VariableDec(name, type));
-    }
-
-    public void setOverriding(boolean isOverriding) {
-        this.isOverriding = isOverriding;
     }
 }

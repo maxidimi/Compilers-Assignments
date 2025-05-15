@@ -39,18 +39,6 @@ class ClassDec {
         return parent;
     }
 
-    public boolean hasParent() {
-        return parent != null;
-    }
-
-    public int getVarOffset() {
-        return varOffset;
-    }
-
-    public int getMethodOffset() {
-        return methodOffset;
-    }
-
     public VariableDec getField(String name) {
         return fields.get(name);
     }
@@ -59,12 +47,8 @@ class ClassDec {
         return methods.get(name);
     }
 
-    public Map<String, VariableDec> getFields() {
-        return fields;
-    }
-
-    public Map<String, MethodDec> getMethods() {
-        return methods;
+    public boolean hasParent() {
+        return parent != null;
     }
 
     public boolean hasMethod(String name) {
@@ -72,14 +56,6 @@ class ClassDec {
     }
 
     // Setters
-    public void setVarOffset(int varOffset) {
-        this.varOffset = varOffset;
-    }
-
-    public void setMethodOffset(int methodOffset) {
-        this.methodOffset = methodOffset;
-    }
-
     public void setField(String name, String type) throws Exception {
         // Check if the field already exists manually
         if (fields.containsKey(name)) {

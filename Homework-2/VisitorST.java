@@ -16,11 +16,12 @@ class VisitorST extends GJDepthFirst<String, Void>{
         inVarDecleration = false;
         currentClass = null;
         currentMethod = null;
+        mainClassName = null;
     }
 
     /**
-     * f1 -> Identifier()
-     * f11 -> Identifier()
+     * f1 -> Identifier() = main class name
+     * f11 -> Identifier() = arguments array name
      * f14 -> ( VarDeclaration() )*
      * f15 -> ( Statement() )*
      */
@@ -30,25 +31,22 @@ class VisitorST extends GJDepthFirst<String, Void>{
 
         // Main class name
         String mainClassName = n.f1.accept(this, null);
-        currentClass = mainClassName;
-        symbolTable.mainClassName = mainClassName;
+        symbolTable.mainClassName = currentClass = this.mainClassName = mainClassName;
 
         // Create main class & add it to the symbol table
         ClassDec mainClass = new ClassDec(mainClassName, null);
         symbolTable.setClass(mainClass);
-        this.mainClassName = mainClassName;
 
         // Command line arguments
         String args = n.f11.accept(this, null);
-        String argsType = "String[]";
         MethodDec mainMethod = new MethodDec("main", "void");
-        mainMethod.setArgument(args, argsType);
+        mainMethod.setArgument(args, "String[]");
 
         // Add the main method to the main class
         mainClass.setMethod(mainMethod);
         currentMethod = "main";
 
-        // Variables
+        // Variable declarations
         inVarDecleration = true;
         n.f14.accept(this, argu);
         inVarDecleration = false;
@@ -69,20 +67,19 @@ class VisitorST extends GJDepthFirst<String, Void>{
      */
     @Override
     public String visit(ClassDeclaration n, Void argu) throws Exception {
-        
         // Classname
         String classname = n.f1.accept(this, argu);
         currentClass = classname;
 
         // Check if the class has same name as the main class
         if (classname.equals(mainClassName)) {
-            throw new Exception("Class " + classname + " cannot be the same as the main class");
+            throw new Exception("ClassDeclaration: Class name can't be the same as the main class");
         }
 
         // Create class & add it to the symbol table
         symbolTable.setClass(new ClassDec(classname, null));
 
-        // Fields
+        // Field declarations
         n.f3.accept(this, argu);
 
         // Methods
@@ -112,19 +109,19 @@ class VisitorST extends GJDepthFirst<String, Void>{
 
         // Check if the class has same name as the main class
         if (classname.equals(mainClassName)) {
-            throw new Exception("Class " + classname + " cannot be the same as the main class");
+            throw new Exception("ClassExtendsDeclaration: Class can't be the same as the main class");
         }
 
-        // Parent class
+        // Parent class name
         String parent = n.f3.accept(this, argu);
 
-        // Check that parent class must always be defined before the child class
+        // Check that parent class has already be defined
         ClassDec parentClass = symbolTable.getClass(parent);
 
         // Create class & add it to the symbol table
         symbolTable.setClass(new ClassDec(classname, parentClass));
 
-        // Fields
+        // Field declarations
         n.f5.accept(this, argu);
 
         // Methods
@@ -157,46 +154,37 @@ class VisitorST extends GJDepthFirst<String, Void>{
         String myType = n.f1.accept(this, null);
 
         // Name of the method
-        String myName = n.f2.accept(this, null);
-        currentMethod = myName;
+        String myName = currentMethod = n.f2.accept(this, null);
 
         // Check for overriding & then add the method to the current class
+        // In this phase, we don't need to check if the signatures are same, just that a method with the same name exists in the parent(s) class
         MethodDec methodDec = new MethodDec(myName, myType);
         ClassDec classDec = symbolTable.classes.get(currentClass);
-        if (classDec != null) {
-            // In this phase, we don't need to check if the signatures are same, just that a method with the same name exists in the parent(s) class
-            if (classDec.hasParent()) {
-                ClassDec tmpClass = classDec;
-                while (tmpClass.hasParent()) {
-                    tmpClass = symbolTable.getClass(tmpClass.getParent());
-                    if (tmpClass.hasMethod(myName)) {
-                        methodDec.setOverriding(true);
-                        break;
-                    }
+        classDec.setMethod(methodDec);
+        if (classDec.hasParent()) {
+            ClassDec tmpClass = classDec;
+            while (tmpClass.hasParent()) {
+                tmpClass = symbolTable.getClass(tmpClass.getParent());
+                if (tmpClass.hasMethod(myName)) {
+                    methodDec.setOverriding(true); // Set flag for overriding
+                    break;
                 }
             }
-            classDec.setMethod(methodDec);
-        } else {
-            throw new Exception("Class " + currentClass + " not found in symbol table");
         }
         
         // Arguments list
         String argumentList = n.f4.accept(this, argu);
         if (argumentList != null && !argumentList.isEmpty()) {
-            String[] args = argumentList.split(",");
+            String[] args = argumentList.split(","); // Split by comma - "Type Identifier"
             for (String arg : args) {
-                String[] parts = arg.trim().split(" ");
-                if (parts.length == 2) {
-                    String argType = parts[0];
-                    String argName = parts[1];
-                    methodDec.setArgument(argName, argType);
-                } else {
-                    throw new Exception("Invalid argument format");
-                }
+                String[] parts = arg.trim().split(" "); // Split by space - "Type" "Identifier"
+                String argType = parts[0];
+                String argName = parts[1];
+                methodDec.setArgument(argName, argType);
             }
         }
 
-        // Variables
+        // Variable declarations
         inVarDecleration = true;
         n.f7.accept(this, argu);
         inVarDecleration = false;
@@ -232,7 +220,7 @@ class VisitorST extends GJDepthFirst<String, Void>{
             if (methodDec != null) {
                 methodDec.setVariable(var, type);
             } else {
-                throw new Exception("Method " + currentMethod + " not found in symbol table, class " + currentClass);
+                throw new Exception("VarDeclaration: Method " + currentMethod + " not found in symbol table, class " + currentClass);
             }
 
         } else { // Add as a field to the current class
@@ -285,13 +273,8 @@ class VisitorST extends GJDepthFirst<String, Void>{
      */
     @Override
     public String visit(FormalParameter n, Void argu) throws Exception{
-        // Type of argument
-        String type = n.f0.accept(this, null);
-
-        // Name of argument
-        String name = n.f1.accept(this, null);
-
-        return type + " " + name;
+        // Type + Name
+        return n.f0.accept(this, null) + " " + n.f1.accept(this, null);
     }
 
     @Override
