@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 // Information about a method
@@ -32,7 +33,7 @@ class MethodDec {
         this.offset = 0;
         this.isOverriding = false;
         this.variables = new HashMap<>();
-        this.arguments = new HashMap<>();
+        this.arguments = new LinkedHashMap<>();
     }
 
     // Getters

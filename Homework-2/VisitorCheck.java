@@ -8,7 +8,6 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     String currentMethod;
     ClassDec currentClassDec;
     MethodDec currentMethodDec;
-    boolean zeroArraylength;
 
     VisitorCheck(SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
@@ -16,7 +15,6 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         this.currentMethod = null;
         this.currentClassDec = null;
         this.currentMethodDec = null;
-        this.zeroArraylength = false;
     }
 
     // Check if the type is valid - int, boolean, int[], boolean[] or a defined class
@@ -170,7 +168,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
                 }
 
                 // Check for arguments
-                String[] argTypes = argumentList.split(", ");
+                String[] argTypes = argumentList != null ? argumentList.split(", ") : new String[0];
                 if (argTypes.length != parentMethod.getArguments().size()) {
                     throw new Exception("Invalid number of arguments for method " + myName + ": " + argTypes.length + (" instead of " + parentMethod.getArguments().size()) + " in class " + currentClass);
                 }
@@ -737,7 +735,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
             for (i = 0; i < argTypes.length; i++) {
                 String inpArgType = argTypes[i].trim();
                 if (!inpArgType.equals(correctArgsTypes[i]) && !isSubtype(correctArgsTypes[i], inpArgType)) {
-                    throw new Exception("Invalid type for argument " + (i + 1) + " of method " + method + " in class " + objectType + ": " + inpArgType + (" instead of " + correctArgsTypes[i]));
+                    throw new Exception("Message send: Invalid type for argument " + (i + 1) + " of method " + method + " in class " + objectType + ": " + inpArgType + (" instead of " + correctArgsTypes[i]));
                 }
             }
         }
@@ -768,10 +766,6 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
             throw new Exception("Invalid type for array size: " + type);
         }
 
-        if (zeroArraylength) {
-            throw new Exception("Array length cannot be zero");
-        }
-
         return "boolean[]";
     }
     /**
@@ -790,17 +784,11 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
             throw new Exception("Invalid type for array size: " + type);
         }
 
-        if (zeroArraylength) {
-            throw new Exception("Array length cannot be zero");
-        }
-
         return "int[]";
     }
 
     @Override
     public String visit(IntegerLiteral n, Void argu) throws Exception {
-        int value = Integer.parseInt(n.f0.toString());
-        //?zeroArraylength = (value == 0); // Flag to check if the array length is zero
         return "int";
     }
     @Override
