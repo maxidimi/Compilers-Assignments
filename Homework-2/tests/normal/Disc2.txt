@@ -1,0 +1,16 @@
+-----------Class A-----------
+--Variables---
+---Methods---
+A.getArr : 0
+
+-----------Class B-----------
+--Variables---
+B.obj : 0
+---Methods---
+B.set : 0
+B.get : 8
+
+-----------Class C-----------
+--Variables---
+---Methods---
+

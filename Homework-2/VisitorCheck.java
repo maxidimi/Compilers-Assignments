@@ -681,7 +681,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         String type = null;
 
         // Object type
-        String objectType = checkForId(n.f0.accept(this, argu));
+        String objectType = checkForIdAndClass(n.f0.accept(this, argu));
 
         // Method name
         String method = n.f2.accept(this, argu);
@@ -742,7 +742,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
      */
     @Override
     public String visit(BooleanArrayAllocationExpression n, Void argu) throws Exception {
-        String type = n.f3.accept(this, argu);
+        String type = checkForId(n.f3.accept(this, argu));
 
         if (!type.equals("int")) {
             throw new Exception("BooleanArrayAllocationExpression: Invalid type for array size: " + type);
@@ -760,7 +760,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     @Override
     public String visit(IntegerArrayAllocationExpression n, Void argu) throws Exception {
         // Size of the array
-        String type = n.f3.accept(this, argu);
+        String type = checkForId(n.f3.accept(this, argu));
 
         if (!type.equals("int")) {
             throw new Exception("IntegerArrayAllocationExpression: Invalid type for array size: " + type);
@@ -804,7 +804,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     }
 
     // Check for a variable in the symbol table and return its type
-    public String lookForId(String name) throws Exception {
+    public String lookForId(String name, Boolean checkClasses) throws Exception {
         // Check if the variable is a local variable of the current method
         if (currentMethodDec != null) {
             VariableDec var = currentMethodDec.getVariableOrArgument(name);
@@ -832,14 +832,16 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
             
             currentClass = classTemp.getParent();
             currentClassDec = symbolTable.getClass(currentClass);
-            String type = lookForId(name);
+            String type = lookForId(name, checkClasses);
 
             currentClass = temp;
             currentClassDec = classTemp;
 
             return type;
-        } else {
+        } else if (checkClasses) {
             throw new Exception("lookForId: Can't find symbol " + name);
+        } else {
+            return null;
         }
     }
 
@@ -862,15 +864,32 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
     public String checkForId(String name) throws Exception {
         if (!isValidType(name)) {
-            String temp = lookForId(name);
+            String temp = lookForId(name, true);
             if (temp != null) {
                 name = temp;
             } else {
-                throw new Exception("checkForId: Invalid type for array: " + name);
+                throw new Exception("checkForId: Invalid type for binding: " + name);
             }
         }
 
         return name;
+    }
+
+    // Check first if it is a primitive type, then check if it is a class - used in method calls
+    public String checkForIdAndClass(String name) throws Exception {
+        // Check that type in not a primitive type
+        if (name == null || name.equals("int") || name.equals("boolean") || name.equals("int[]") || name.equals("boolean[]")) {
+            throw new Exception("checkForId: Invalid type for message send: " + name);
+        } else { // Look for the binding in the symbol table
+            String temp = lookForId(name, false);
+            if (temp == null && symbolTable.hasClass(name)) {
+                return name;
+            } else if (!(temp.equals("int") || temp.equals("boolean") || temp.equals("int[]") || temp.equals("boolean[]"))) {
+                return temp;
+            } else {
+                throw new Exception("checkForId: Invalid type for message send: " + temp);
+            }
+        }
     }
 
     // A a = new B(); where B extends A
