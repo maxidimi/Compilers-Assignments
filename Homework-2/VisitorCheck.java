@@ -592,7 +592,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         String index = checkForId(n.f2.accept(this, argu));
 
         // Check if the types are valid
-        if ((arrayType == null) || (index == null) || !arrayType.equals("int[]") || !index.equals("int")) {
+        if ((arrayType == null) || (index == null) || (!arrayType.equals("int[]") && !arrayType.equals("boolean[]")) || !index.equals("int")) {
             throw new Exception("ArrayLookup: Invalid types for array lookup: " + arrayType + " and " + index);
         }
 

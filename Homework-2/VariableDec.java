@@ -11,9 +11,10 @@ class VariableDec {
     int offset;
 
     VariableDec(String name, String type) {
+        // Checks to ensure that name is not a primitive type or "this" are made in parsing
         this.name = name;
         this.type = type;
-        this.offset = -1; // Default value
+        this.offset = 0;
     }
 
     // Getters

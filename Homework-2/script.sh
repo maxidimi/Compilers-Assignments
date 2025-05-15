@@ -15,7 +15,7 @@ for input_file in "$TEST_DIR"/*.java; do
         echo "Running test: $base_name"
 
         # Run the program
-        java "$JAVA_CLASS" "$input_file" > "$TMP_OUT"
+        java "$JAVA_CLASS" "$input_file" >& "$TMP_OUT"
 
         # Compare outputs
         if diff -q "$TMP_OUT" "$expected_file" > /dev/null; then

@@ -1,11 +1,11 @@
-class ShadowBaseField {
+class BadAssign {
 
     public static void main(String[] args){
         A a;
+        int A;
+        int i;
         a = new A();
-        System.out.println(a.getX());
-        a = new B();
-        System.out.println(a.getX());
+        i = A.getX();
     }
 
 }
