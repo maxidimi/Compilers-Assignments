@@ -1,0 +1,14 @@
+-----------Class A-----------
+--Variables---
+A.i : 0
+A.a : 4
+---Methods---
+A.foo : 0
+A.bar : 8
+
+-----------Class B-----------
+--Variables---
+B.i : 12
+---Methods---
+B.foobar : 16
+

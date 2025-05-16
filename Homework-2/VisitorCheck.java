@@ -680,7 +680,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     public String visit(MessageSend n, Void argu) throws Exception {
         String type = null;
 
-        // Object type
+        //? Object type
         String objectType = checkForIdAndClass(n.f0.accept(this, argu));
 
         // Method name
