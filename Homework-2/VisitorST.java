@@ -172,7 +172,7 @@ class VisitorST extends GJDepthFirst<String, Void>{
             while (tmpClass.hasParent()) {
                 tmpClass = symbolTable.getClass(tmpClass.getParent());
                 if (tmpClass.hasMethod(myName)) {
-                    methodDec.setOverriding(true); // Set flag for overriding
+                    classDec.setMethodOverride(myName); // Set the method to be overridden
                     break;
                 }
             }

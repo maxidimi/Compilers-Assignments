@@ -89,13 +89,20 @@ class ClassDec {
         method.classInto = this; // Set the class that contains the method
 
         // Update the offset
-        if (!method.isOverriding()) {
-            method.setOffset(methodOffset);
-            methodOffset += 8;
-        }
+        method.setOffset(methodOffset);
+        methodOffset += 8;
     }
 
     public void setMethodOffset(int offset) {
         this.methodOffset = offset;
+    }
+
+    public void setMethodOverride(String name) {
+        MethodDec method = methods.get(name);
+        method.setOverriding(true);
+        if (method != null) {
+            methodOffset -= 8; // Decrease the offset for overriding methods
+            method.setOffset(methodOffset);
+        }
     }
 }

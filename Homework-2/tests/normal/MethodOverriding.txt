@@ -1,0 +1,16 @@
+-----------Class A-----------
+--Variables---
+A.i : 0
+A.flag : 4
+A.j : 5
+---Methods---
+A.foo : 0
+A.fa : 8
+
+-----------Class B-----------
+--Variables---
+B.type : 9
+B.k : 17
+---Methods---
+B.bla : 16
+
