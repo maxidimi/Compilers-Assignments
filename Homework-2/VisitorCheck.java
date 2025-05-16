@@ -678,9 +678,8 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
      */
     @Override
     public String visit(MessageSend n, Void argu) throws Exception {
-        String type = null;
-
         //? Object type
+        //String objectType = lookForId(n.f0.accept(this, argu), false);
         String objectType = checkForIdAndClass(n.f0.accept(this, argu));
 
         // Method name
@@ -691,7 +690,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
         // Check if the object (it's type) has the method
         MethodDec methodDec = lookForMethod(method, objectType);
-        type = methodDec.getReturnType();
+        String type = methodDec.getReturnType();
 
         // Check if the method has the same number of arguments
         if ((methodDec.getArguments().size() == 0) && (inputArgsTypes != null)) {
@@ -804,7 +803,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     }
 
     // Check for a variable in the symbol table and return its type
-    public String lookForId(String name, Boolean checkClasses) throws Exception {
+    public String lookForId(String name, Boolean checkClassesLater) throws Exception {
         // Check if the variable is a local variable of the current method
         if (currentMethodDec != null) {
             VariableDec var = currentMethodDec.getVariableOrArgument(name);
@@ -832,16 +831,16 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
             
             currentClass = classTemp.getParent();
             currentClassDec = symbolTable.getClass(currentClass);
-            String type = lookForId(name, checkClasses);
+            String type = lookForId(name, checkClassesLater);
 
             currentClass = temp;
             currentClassDec = classTemp;
 
             return type;
-        } else if (checkClasses) {
-            throw new Exception("lookForId: Can't find symbol " + name);
-        } else {
+        } else if (checkClassesLater) { // Don't throw an exception, we have further checks later
             return null;
+        } else {
+            throw new Exception("lookForId: Can't find symbol " + name);
         }
     }
 
@@ -864,7 +863,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
     public String checkForId(String name) throws Exception {
         if (!isValidType(name)) {
-            String temp = lookForId(name, true);
+            String temp = lookForId(name, false);
             if (temp != null) {
                 name = temp;
             } else {
@@ -876,12 +875,12 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     }
 
     // Check first if it is a primitive type, then check if it is a class - used in method calls
-    public String checkForIdAndClass(String name) throws Exception {
+    public String checkForIdAndClass(String name) throws Exception { //? Remove if finally not used in static calls
         // Check that type in not a primitive type
         if (name == null || name.equals("int") || name.equals("boolean") || name.equals("int[]") || name.equals("boolean[]")) {
             throw new Exception("checkForId: Invalid type for message send: " + name);
         } else { // Look for the binding in the symbol table
-            String temp = lookForId(name, false);
+            String temp = lookForId(name, true);
             if (temp == null && symbolTable.hasClass(name)) {
                 return name;
             } else if (!(temp.equals("int") || temp.equals("boolean") || temp.equals("int[]") || temp.equals("boolean[]"))) {
