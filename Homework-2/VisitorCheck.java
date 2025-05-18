@@ -145,7 +145,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         String returnType = checkForId(n.f10.accept(this, argu));
 
         // Check if the return type is same as in the signature
-        if (!returnType.equals(myType)) {
+        if (!returnType.equals(myType) && !isSubtype(myType, returnType)) {
             throw new Exception("MethodDeclaration: Invalid return type for method " + myName + ": " + returnType + (" instead of " + myType) + " in class " + currentClass);
         }
 
@@ -844,6 +844,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         }
     }
 
+    // Find if a method exists in the class or its super class(es)
     public MethodDec lookForMethod(String method, String className) throws Exception {
         // Check if the method is in the input class
         ClassDec classTemp = symbolTable.getClass(className);
@@ -861,6 +862,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         }
     }
 
+    // Check if the type is valid - int, boolean, int[], boolean[] or a defined class and then check if it is a variable or a class
     public String checkForId(String name) throws Exception {
         if (!isValidType(name)) {
             String temp = lookForId(name, false);

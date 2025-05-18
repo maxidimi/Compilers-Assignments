@@ -1,4 +1,4 @@
-class MainClass {
+class MethodSubtypingReturn {
     public static void main(String[] args) {
         B b;
         A a;
@@ -13,8 +13,6 @@ class A {
 }
 
 class B extends A {
-    // ERROR: cannot override method with incompatible return type
-    // Trying to override A.getSelf() which returns B, with a method returning A (supertype)
     public A getSelf() {
         return new A();
     }
