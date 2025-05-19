@@ -1,0 +1,9 @@
+-----------Class A-----------
+--Variables---
+---Methods---
+
+-----------Class B-----------
+--Variables---
+---Methods---
+B.foo : 0
+

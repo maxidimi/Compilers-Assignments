@@ -6,7 +6,7 @@ import syntaxtree.*;
 public class Main {
     public static void main(String[] args) throws Exception {
         if(args.length < 1){
-            System.err.println("Usage: java Main <inputFile>");
+            System.err.println("Usage: java Main <inputFiles>");
             System.exit(1);
         }
 
@@ -42,7 +42,7 @@ public class Main {
 
                     System.out.println("---Methods---");
                     for (String method : v.methods.keySet()) {
-                        //if method not overriding
+                        // Print only the methods that are not overriding others previously defined
                         if (!v.methods.get(method).isOverriding) {
                             System.out.println(k + "." + method + " : " + v.methods.get(method).offset);
                         }

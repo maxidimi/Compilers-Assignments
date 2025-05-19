@@ -1,21 +1,33 @@
-class MainClass {
+class Test {
     public static void main(String[] args) {
-        B b;
-        A a;
-        a = b.getSelf();
-        b = new B();
+        //System.out.println(A.foo(1, 2));
     }
 }
+
 class A {
-    public A getSelf() {
-        return new B();
+    int i;
+    A a;
+    int[] arr;
+    boolean[] b;
+
+    public int foo(int i, int j) {
+        int k;
+        k = i+j;
+        k = this.foo(i, j);
+
+        return k; 
     }
 }
 
 class B extends A {
-    // ERROR: cannot override method with incompatible return type
-    // Trying to override A.getSelf() which returns B, with a method returning A (supertype)
-    public A getSelf() {
-        return new A();
+    boolean i;
+
+    public boolean foo(int i, int j) {
+        int k;
+        k = i+j;
+        //k = this.foo(i, j);
+
+        //return k; 
+        return true;
     }
 }

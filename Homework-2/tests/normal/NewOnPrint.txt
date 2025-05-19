@@ -1,0 +1,7 @@
+-----------Class A-----------
+--Variables---
+A.i : 0
+A.a : 4
+---Methods---
+A.foo : 0
+

@@ -142,11 +142,11 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         n.f8.accept(this, argu);
 
         // Return expression's type
-        String returnType = checkForId(n.f10.accept(this, argu));
+        String returnExpType = checkForId(n.f10.accept(this, argu));
 
-        // Check if the return type is same as in the signature
-        if (!returnType.equals(myType) && !isSubtype(myType, returnType)) {
-            throw new Exception("MethodDeclaration: Invalid return type for method " + myName + ": " + returnType + (" instead of " + myType) + " in class " + currentClass);
+        // Check if the return type is same as in the signature or if it is a subclass
+        if (!returnExpType.equals(myType) && !isSubtype(myType, returnExpType)) {
+            throw new Exception("MethodDeclaration: Invalid return type for method " + myName + ": " + returnExpType + (" instead of " + myType) + " in class " + currentClass);
         }
 
         // Check for overriding - if exists, methods must have same argument types and return type
@@ -156,7 +156,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
             // Check if the return type is same as in the overriden's signature
             if (!parentMethod.getReturnType().equals(myType)) {
-                throw new Exception("MethodDeclaration: Invalid return type for method " + myName + ": " + returnType + (" instead of " + myType) + " in class " + currentClass);
+                throw new Exception("MethodDeclaration: Invalid return type for overriding method " + myName + ": " + myType + (" instead of " + parentMethod.getReturnType()) + " in class " + currentClass);
             }
 
             // Get expected types
@@ -197,10 +197,9 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     * f2 -> ";"
     */
     @Override
-    public String visit(VarDeclaration n, Void argu) throws Exception {// Type of the variable
+    public String visit(VarDeclaration n, Void argu) throws Exception {
+        // Type & name of the variable
         String type = n.f0.accept(this, argu);
-
-        // Name of the variable
         String var = n.f1.accept(this, argu);
 
         // Check if the type is valid
@@ -255,10 +254,8 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
      */
     @Override
     public String visit(FormalParameter n, Void argu) throws Exception{
-        // Type of argument
+        // Type & name of argument
         String type = n.f0.accept(this, null);
-
-        // Name of argument
         String name = n.f1.accept(this, null);
 
         // Check if the type is valid
@@ -276,7 +273,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
      */
     @Override
     public String visit(BracketExpression n, Void argu) throws Exception {
-        return checkForId(n.f1.accept(this, argu));
+        return checkForId(n.f1.accept(this, argu)); // Return the type of the expression
     }
 
     /**
@@ -291,11 +288,11 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     @Override
     public String visit(IfStatement n, Void argu) throws Exception {
         // Condition type
-        String condition = checkForId(n.f2.accept(this, argu));
+        String conditionType = checkForId(n.f2.accept(this, argu));
 
         // Check if the type is valid
-        if (!condition.equals("boolean")) {
-            throw new Exception("IfStatement: Invalid type " + condition + " for if statement");
+        if (!conditionType.equals("boolean")) {
+            throw new Exception("IfStatement: Invalid type " + conditionType + " for if statement");
         }
 
         // Then statement
@@ -316,11 +313,11 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     @Override
     public String visit(WhileStatement n, Void argu) throws Exception {
         // Condition type
-        String condition = checkForId(n.f2.accept(this, argu));
+        String conditionType = checkForId(n.f2.accept(this, argu));
 
         // Check if the type is valid
-        if (!condition.equals("boolean")) {
-            throw new Exception("WhileStatement: Invalid type " + condition + " for while statement");
+        if (!conditionType.equals("boolean")) {
+            throw new Exception("WhileStatement: Invalid type " + conditionType + " for while statement");
         }
 
         // Statement
@@ -339,11 +336,11 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     @Override
     public String visit(PrintStatement n, Void argu) throws Exception {
         // Expression type to print
-        String expr = checkForId(n.f2.accept(this, argu));
+        String expressionType = checkForId(n.f2.accept(this, argu));
 
         // Check if the type is valid
-        if (!expr.equals("int")) {
-            throw new Exception("PrintStatement: Invalid type " + expr + " for print statement");
+        if (!expressionType.equals("int")) {
+            throw new Exception("PrintStatement: Invalid type " + expressionType + " for print statement");
         }
 
         return null;
@@ -678,8 +675,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
      */
     @Override
     public String visit(MessageSend n, Void argu) throws Exception {
-        //? Object type
-        //String objectType = lookForId(n.f0.accept(this, argu), false);
+        // Object type
         String objectType = checkForIdAndClass(n.f0.accept(this, argu));
 
         // Method name
@@ -715,7 +711,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
             // Check that the types are correct
             for (i = 0; i < argTypes.length; i++) {
                 String inpArgType = argTypes[i].trim();
-                if (!inpArgType.equals(correctArgsTypes[i]) && !isSubtype(correctArgsTypes[i], inpArgType)) {
+                if (!inpArgType.equals(correctArgsTypes[i]) && !isSubtype(correctArgsTypes[i], inpArgType)) { // Check for subtyping on argument
                     throw new Exception("MessageSend: Message send: Invalid type for argument " + (i + 1) + " of method " + method + " in class " + objectType + ": " + inpArgType + (" instead of " + correctArgsTypes[i]));
                 }
             }
@@ -877,11 +873,12 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     }
 
     // Check first if it is a primitive type, then check if it is a class - used in method calls
-    public String checkForIdAndClass(String name) throws Exception { //? Remove if finally not used in static calls
+    public String checkForIdAndClass(String name) throws Exception {
         // Check that type in not a primitive type
         if (name == null || name.equals("int") || name.equals("boolean") || name.equals("int[]") || name.equals("boolean[]")) {
             throw new Exception("checkForId: Invalid type for message send: " + name);
         } else { // Look for the binding in the symbol table
+            //? Check that what returns has came from either a class allocation, a variable or a method call (with return type a class)
             String temp = lookForId(name, true);
             if (temp == null && symbolTable.hasClass(name)) {
                 return name;
