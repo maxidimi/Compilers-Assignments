@@ -13,7 +13,7 @@ public class Main {
         for (int i = 0; i < args.length; i++) {
             FileInputStream fis = null;
             try{
-                fis = new FileInputStream(args[0]); // Read the input file
+                fis = new FileInputStream(args[i]); // Read the input file
                 MiniJavaParser parser = new MiniJavaParser(fis); // Parse the input file
 
                 Goal root = parser.Goal();
@@ -50,11 +50,20 @@ public class Main {
                     System.out.println();
                 });
             }
-            catch(ParseException ex){
-                System.out.println(ex.getMessage());
+            catch(NullPointerException ex){
+                System.err.println("Null pointer exception: " + ex.getMessage() + " for file " + args[i]);
             }
             catch(FileNotFoundException ex){
-                System.err.println(ex.getMessage());
+                System.err.println("File not found: " + ex.getMessage() + " for file " + args[i]);
+            }
+            catch(IOException ex){
+                System.err.println("IO error: " + ex.getMessage() + " for file " + args[i]);
+            }
+            catch(ParseException ex){
+                System.err.println("Parse error: " + ex.getMessage() + " for file " + args[i]);
+            }
+            catch(Exception ex){
+                System.err.println("Error: " + ex.getMessage() + " for file " + args[i]);
             }
             finally{
                 try{

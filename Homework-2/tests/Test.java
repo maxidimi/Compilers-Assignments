@@ -7,13 +7,12 @@ class Test {
 class A {
     int i;
     A a;
-    int[] arr;
-    boolean[] b;
 
     public int foo(int i, int j) {
         int k;
         k = i+j;
         k = this.foo(i, j);
+        k = new int[10].length;
 
         return k; 
     }
@@ -21,13 +20,4 @@ class A {
 
 class B extends A {
     boolean i;
-
-    public boolean foo(int i, int j) {
-        int k;
-        k = i+j;
-        //k = this.foo(i, j);
-
-        //return k; 
-        return true;
-    }
 }
