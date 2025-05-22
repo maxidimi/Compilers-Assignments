@@ -51,19 +51,19 @@ public class Main {
                 });
             }
             catch(NullPointerException ex){
-                System.err.println("Null pointer exception: " + ex.getMessage() + " for file " + args[i]);
+                System.err.println("Null pointer exception: " + ex.getMessage() + " for file " + args[i]); ex.printStackTrace();
             }
             catch(FileNotFoundException ex){
-                System.err.println("File not found: " + ex.getMessage() + " for file " + args[i]);
+                System.err.println("File not found: " + ex.getMessage() + " for file " + args[i]); ex.printStackTrace();
             }
             catch(IOException ex){
-                System.err.println("IO error: " + ex.getMessage() + " for file " + args[i]);
+                System.err.println("IO error: " + ex.getMessage() + " for file " + args[i]); ex.printStackTrace();
             }
             catch(ParseException ex){
-                System.err.println("Parse error: " + ex.getMessage() + " for file " + args[i]);
+                System.err.println("Parse error: " + ex.getMessage() + " for file " + args[i]); ex.printStackTrace();
             }
             catch(Exception ex){
-                System.err.println("Error: " + ex.getMessage() + " for file " + args[i]);
+                System.err.println("Error: " + ex.getMessage() + " for file " + args[i]); ex.printStackTrace();
             }
             finally{
                 try{

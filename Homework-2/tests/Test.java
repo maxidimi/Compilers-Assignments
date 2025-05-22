@@ -20,4 +20,8 @@ class A {
 
 class B extends A {
     boolean i;
+
+    public int getI() {
+        return i;
+    }
 }
