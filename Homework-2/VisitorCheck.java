@@ -171,7 +171,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
             // Check if the number of arguments is the same
             if (inputTypes.length != parentMethod.getArguments().size()) {
-                throw new Exception("MethodDeclaration: Invalid number of arguments for method " + myName + ": " + inputTypes.length + (" instead of " + parentMethod.getArguments().size()) + " in class " + currentClass);
+                throw new Exception("MethodDeclaration: Invalid number of arguments for overriding method " + myName + ": " + inputTypes.length + (" instead of " + parentMethod.getArguments().size()) + " in class " + currentClass);
             }
 
             // Check that the given types are same as the expected ones
@@ -179,7 +179,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
                 String argType = inputTypes[i].trim();
                 argType = argType.split(" ")[0];
                 if (!argType.equals(expectedTypes[i])) {
-                    throw new Exception("MethodDeclaration: Invalid type for argument " + (i + 1) + " of method " + myName + ": " + argType + (" instead of " + expectedTypes[i]) + " in class " + currentClass);
+                    throw new Exception("MethodDeclaration: Invalid type for argument " + (i + 1) + " for overriding method " + myName + ": " + argType + (" instead of " + expectedTypes[i]) + " in class " + currentClass);
                 }
             }
         }
@@ -590,7 +590,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
         // Check if the types are valid
         if ((arrayType == null) || (index == null) || (!arrayType.equals("int[]") && !arrayType.equals("boolean[]")) || !index.equals("int")) {
-            throw new Exception("ArrayLookup: Invalid types for array lookup: " + arrayType + " and " + index);
+            throw new Exception("ArrayLookup: Invalid types for array lookup: " + arrayType + " and " + index + " (instead of int[] and int or boolean[] and int)");
         }
 
         return arrayType.substring(0, arrayType.length() - 2); // Remove the brackets
@@ -872,17 +872,21 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         return name;
     }
 
+    public boolean isPrimitiveType(String type) {
+        return type.equals("int") || type.equals("boolean") || type.equals("int[]") || type.equals("boolean[]");
+    }
+
     // Check first if it is a primitive type, then check if it is a class - used in method calls
     public String checkForIdAndClass(String name) throws Exception {
         // Check that type in not a primitive type
-        if (name == null || name.equals("int") || name.equals("boolean") || name.equals("int[]") || name.equals("boolean[]")) {
-            throw new Exception("checkForId: Invalid type for message send: " + name);
+        if (name == null || isPrimitiveType(name)) {
+            throw new Exception("checkForId: Invalid object type for message send: " + name);
         } else { // Look for the binding in the symbol table
             //? Check that what returns has came from either a class allocation, a variable or a method call (with return type a class)
             String temp = lookForId(name, true);
             if (temp == null && symbolTable.hasClass(name)) {
                 return name;
-            } else if (!(temp.equals("int") || temp.equals("boolean") || temp.equals("int[]") || temp.equals("boolean[]"))) {
+            } else if (!isPrimitiveType(temp)) {
                 return temp;
             } else {
                 throw new Exception("checkForId: Invalid type for message send: " + temp);
@@ -892,9 +896,12 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
 
     // A a = new B(); where B extends A
     public boolean isSubtype(String A, String B) throws Exception {
-        // Check if class1 is a subclass of class2
-        ClassDec classTemp = symbolTable.getClass(B);
+        if (isPrimitiveType(A) || isPrimitiveType(B)) { // Primitive types are not subtypes of each other
+            return false;
+        }
+        
         // Check recursively in the super class(es)
+        ClassDec classTemp = symbolTable.getClass(B);
         while (classTemp.hasParent()) {
             if (classTemp.getParent().equals(A)) {
                 return true;

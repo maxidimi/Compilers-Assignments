@@ -51,19 +51,24 @@ public class Main {
                 });
             }
             catch(NullPointerException ex){
-                System.err.println("Null pointer exception: " + ex.getMessage() + " for file " + args[i]); ex.printStackTrace();
+                System.err.println("Null pointer exception: " + ex.getMessage() + " for file " + args[i]); //ex.printStackTrace();
+                if (args.length == 1) System.exit(1); // Used for script
             }
             catch(FileNotFoundException ex){
-                System.err.println("File not found: " + ex.getMessage() + " for file " + args[i]); ex.printStackTrace();
+                System.err.println("File not found: " + ex.getMessage() + " for file " + args[i]); //ex.printStackTrace();
+                if (args.length == 1) System.exit(1); // Used for script
             }
             catch(IOException ex){
-                System.err.println("IO error: " + ex.getMessage() + " for file " + args[i]); ex.printStackTrace();
+                System.err.println("IO error: " + ex.getMessage() + " for file " + args[i]); //ex.printStackTrace();
+                if (args.length == 1) System.exit(1); // Used for script
             }
             catch(ParseException ex){
-                System.err.println("Parse error: " + ex.getMessage() + " for file " + args[i]); ex.printStackTrace();
+                System.err.println("Parse error: " + ex.getMessage() + " for file " + args[i]); //ex.printStackTrace();
+                if (args.length == 1) System.exit(1); // Used for script
             }
             catch(Exception ex){
-                System.err.println("Error: " + ex.getMessage() + " for file " + args[i]); ex.printStackTrace();
+                System.err.println("Error: " + ex.getMessage() + " for file " + args[i]); //ex.printStackTrace();
+                if (args.length == 1) System.exit(1); // Used for script
             }
             finally{
                 try{
