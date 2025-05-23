@@ -10,6 +10,7 @@ public class Main {
             System.exit(1);
         }
 
+        boolean flagTestHasFailed = false;
         for (int i = 0; i < args.length; i++) {
             FileInputStream fis = null;
             try{
@@ -52,23 +53,23 @@ public class Main {
             }
             catch(NullPointerException ex){
                 System.err.println("Null pointer exception: " + ex.getMessage() + " for file " + args[i]); //ex.printStackTrace();
-                if (args.length == 1) System.exit(1); // Used for script
+                flagTestHasFailed = true;
             }
             catch(FileNotFoundException ex){
                 System.err.println("File not found: " + ex.getMessage() + " for file " + args[i]); //ex.printStackTrace();
-                if (args.length == 1) System.exit(1); // Used for script
+                flagTestHasFailed = true;
             }
             catch(IOException ex){
                 System.err.println("IO error: " + ex.getMessage() + " for file " + args[i]); //ex.printStackTrace();
-                if (args.length == 1) System.exit(1); // Used for script
+                flagTestHasFailed = true;
             }
             catch(ParseException ex){
                 System.err.println("Parse error: " + ex.getMessage() + " for file " + args[i]); //ex.printStackTrace();
-                if (args.length == 1) System.exit(1); // Used for script
+                flagTestHasFailed = true;
             }
             catch(Exception ex){
                 System.err.println("Error: " + ex.getMessage() + " for file " + args[i]); //ex.printStackTrace();
-                if (args.length == 1) System.exit(1); // Used for script
+                flagTestHasFailed = true;
             }
             finally{
                 try{
@@ -79,5 +80,6 @@ public class Main {
                 }
             }
         }
+        System.exit(flagTestHasFailed ? 1 : 0);
     }
 }
