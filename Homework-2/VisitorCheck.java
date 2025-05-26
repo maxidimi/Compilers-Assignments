@@ -7,6 +7,8 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     String currentMethod; // Name of the current method that is being visited
     ClassDec currentClassDec; // ClassDec object of the current class
     MethodDec currentMethodDec; // MethodDec object of the current method
+    boolean fromPE; // Flag to check if the current id is from a PrimaryExpression
+    boolean fromMessageSend; // Flag to check if the caller is MessageSend
 
     VisitorCheck(SymbolTable symbolTable) {
         this.symbolTable = symbolTable;
@@ -14,6 +16,8 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         this.currentMethod = null;
         this.currentClassDec = null;
         this.currentMethodDec = null;
+        this.fromPE = false;
+        this.fromMessageSend = false;
     }
 
     // Check if the type is valid - int, boolean, int[], boolean[] or a defined class
@@ -416,6 +420,11 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
      */
     @Override
     public String visit(PrimaryExpression n, Void argu) throws Exception {
+        // Set flag to check if the current case is an Identifier - used later
+        if (n.f0.choice instanceof Identifier) {
+            fromPE = true;
+        }
+
         // Visit the primary expression and return the type
         String type = n.f0.accept(this, argu);
 
@@ -676,7 +685,9 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
     @Override
     public String visit(MessageSend n, Void argu) throws Exception {
         // Object type
+        fromMessageSend = true; fromPE = false;
         String objectType = checkForIdAndClass(n.f0.accept(this, argu));
+        fromMessageSend = fromPE = false; // Reset flags
 
         // Method name
         String method = n.f2.accept(this, argu);
@@ -882,14 +893,23 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         if (name == null || isPrimitiveType(name)) {
             throw new Exception("checkForId: Invalid object type for message send: " + name);
         } else { // Look for the binding in the symbol table
-            //? Check that what returns has came from either a class allocation, a variable or a method call (with return type a class)
             String temp = lookForId(name, true);
-            if (temp == null && symbolTable.hasClass(name)) {
-                return name;
-            } else if (!isPrimitiveType(temp)) {
-                return temp;
+
+            if (fromMessageSend && fromPE) {
+                // If the identifier is the object from a message send, we need to check that name is not just a class name
+                if (temp == null) {
+                    throw new Exception("checkForId: Invalid type for message send: " + name);
+                } else {
+                    return temp;
+                }
             } else {
-                throw new Exception("checkForId: Invalid type for message send: " + temp);
+                if (temp == null && symbolTable.hasClass(name)) {
+                    return name;
+                } else if (!isPrimitiveType(temp)) {
+                    return temp;
+                } else {
+                    throw new Exception("checkForId: Invalid type for message send: " + temp);
+                }
             }
         }
     }

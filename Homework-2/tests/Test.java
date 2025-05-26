@@ -1,6 +1,6 @@
 class Test {
     public static void main(String[] args) {
-        //System.out.println(A.foo(1, 2));
+        System.out.println(((A)).foo(1, 2));
     }
 }
 
@@ -13,7 +13,6 @@ class A {
         k = i+j;
         k = this.foo(i, j);
         k = new int[10].length;
-
         return k; 
     }
 }
