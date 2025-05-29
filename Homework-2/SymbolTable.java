@@ -15,7 +15,7 @@ class SymbolTable {
 
     // Getters
     public ClassDec getClass(String name) throws Exception {
-        // Check if the class exists
+        // Check if the class already exists
         if (!classes.containsKey(name)) {
             throw new Exception("Class " + name + " does not exist");
         }

@@ -30,7 +30,7 @@ public class Main {
 
                 // For each class in the symbol table print its name
                 symbolTable.classes.forEach((k, v) -> {
-                    if (k == symbolTable.mainClassName) {
+                    if (k.equals(symbolTable.mainClassName)) {
                         return; // Skip the main class
                     }
 
@@ -52,23 +52,23 @@ public class Main {
                 });
             }
             catch(NullPointerException ex){
-                System.err.println("Null pointer exception: " + ex.getMessage() + " for file " + args[i]); //ex.printStackTrace();
+                System.err.println("Null pointer exception: " + ex.getMessage() + " for file " + args[i] + "\n"); //ex.printStackTrace();
                 flagTestHasFailed = true;
             }
             catch(FileNotFoundException ex){
-                System.err.println("File not found: " + ex.getMessage() + " for file " + args[i]); //ex.printStackTrace();
+                System.err.println("File not found: " + ex.getMessage() + " for file " + args[i] + "\n"); //ex.printStackTrace();
                 flagTestHasFailed = true;
             }
             catch(IOException ex){
-                System.err.println("IO error: " + ex.getMessage() + " for file " + args[i]); //ex.printStackTrace();
+                System.err.println("IO error: " + ex.getMessage() + " for file " + args[i] + "\n"); //ex.printStackTrace();
                 flagTestHasFailed = true;
             }
             catch(ParseException ex){
-                System.err.println("Parse error: " + ex.getMessage() + " for file " + args[i]); //ex.printStackTrace();
+                System.err.println("Parse error: " + ex.getMessage() + " for file " + args[i] + "\n"); //ex.printStackTrace();
                 flagTestHasFailed = true;
             }
             catch(Exception ex){
-                System.err.println("Error: " + ex.getMessage() + " for file " + args[i]); //ex.printStackTrace();
+                System.err.println("Error: " + ex.getMessage() + " for file " + args[i] + "\n"); //ex.printStackTrace();
                 flagTestHasFailed = true;
             }
             finally{

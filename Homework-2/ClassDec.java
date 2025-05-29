@@ -101,7 +101,7 @@ class ClassDec {
         MethodDec method = methods.get(name);
         method.setOverriding(true);
         if (method != null) {
-            methodOffset -= 8; // Decrease the offset for overriding methods
+            methodOffset -= 8; // Decrease the (previously increased) offset for overriding methods
             method.setOffset(methodOffset);
         }
     }

@@ -2,15 +2,12 @@ import syntaxtree.*;
 import visitor.*;
 
 class VisitorST extends GJDepthFirst<String, Void>{
-    
-    // The symbol table
-    SymbolTable symbolTable;
-    Boolean inVarDecleration;
-    String currentClass;
-    String currentMethod;
-    String mainClassName;
+    SymbolTable symbolTable; // The symbol table
+    Boolean inVarDecleration; // Flag to indicate if we are in a variable declaration section
+    String currentClass; // Name of the current class being visited
+    String currentMethod; // Name of the current method being visited
+    String mainClassName; // Name of the main class
 
-    // Constructor
     VisitorST() {
         symbolTable = new SymbolTable();
         inVarDecleration = false;
@@ -123,7 +120,7 @@ class VisitorST extends GJDepthFirst<String, Void>{
         symbolTable.setClass(classDec);
 
         // If extends main class, don't add "main" as offset to methods
-        if (parent == mainClassName) {
+        if (parent.equals(mainClassName)) {
             classDec.setMethodOffset(0); // Reset method offset
         }
 
