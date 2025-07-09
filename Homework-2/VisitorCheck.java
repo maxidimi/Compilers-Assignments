@@ -598,8 +598,8 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         String index = checkForId(n.f2.accept(this, argu));
 
         // Check if the types are valid
-        if ((arrayType == null) || (index == null) || (!arrayType.equals("int[]") && !arrayType.equals("boolean[]")) || !index.equals("int")) {
-            throw new Exception("ArrayLookup: Invalid types for array lookup: " + arrayType + " and " + index + " (instead of int[] and int or boolean[] and int)");
+        if ((!arrayType.equals("int[]") && !arrayType.equals("boolean[]")) || !index.equals("int")) {
+            throw new Exception("ArrayLookup: Invalid types for array lookup: " + arrayType + " and " + index + " (instead of int[]/boolean[] and int)");
         }
 
         return arrayType.substring(0, arrayType.length() - 2); // Remove the brackets
