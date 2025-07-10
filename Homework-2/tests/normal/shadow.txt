@@ -1,0 +1,35 @@
+-----------Class A-----------
+--Variables---
+A.x : 0
+A.y : 4
+---Methods---
+A.set_x : 0
+A.x : 8
+A.y : 16
+
+-----------Class B-----------
+--Variables---
+B.x : 8
+---Methods---
+
+-----------Class C-----------
+--Variables---
+C.x : 0
+---Methods---
+C.get_class_x : 0
+C.get_method_x : 8
+C.set_int_x : 16
+
+-----------Class D-----------
+--Variables---
+D.x : 4
+---Methods---
+D.get_class_x2 : 24
+
+-----------Class E-----------
+--Variables---
+E.x : 5
+---Methods---
+E.set_bool_x : 32
+E.get_bool_x : 40
+

@@ -1,0 +1,34 @@
+-----------Class Receiver-----------
+--Variables---
+---Methods---
+Receiver.A : 0
+Receiver.B : 8
+Receiver.C : 16
+Receiver.D : 24
+Receiver.alloc_B_for_A : 32
+Receiver.alloc_C_for_A : 40
+Receiver.alloc_D_for_A : 48
+Receiver.alloc_D_for_B : 56
+
+-----------Class A-----------
+--Variables---
+---Methods---
+A.foo : 0
+A.bar : 8
+A.test : 16
+
+-----------Class B-----------
+--Variables---
+---Methods---
+B.not_overriden : 24
+B.another : 32
+
+-----------Class C-----------
+--Variables---
+---Methods---
+
+-----------Class D-----------
+--Variables---
+---Methods---
+D.stef : 40
+

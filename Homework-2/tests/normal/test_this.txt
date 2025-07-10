@@ -1,0 +1,41 @@
+-----------Class A-----------
+--Variables---
+A.dataA : 0
+---Methods---
+A.InitA : 0
+A.f1 : 8
+
+-----------Class B-----------
+--Variables---
+B.dataB : 4
+---Methods---
+B.InitB : 16
+B.f2 : 24
+
+-----------Class C-----------
+--Variables---
+C.dataC : 8
+---Methods---
+C.InitC : 32
+C.f3 : 40
+
+-----------Class D-----------
+--Variables---
+D.dataD : 12
+---Methods---
+D.InitD : 48
+D.f4 : 56
+
+-----------Class E-----------
+--Variables---
+E.dataE : 16
+---Methods---
+E.InitE : 64
+E.f5 : 72
+
+-----------Class F-----------
+--Variables---
+F.Member_E : 0
+---Methods---
+F.InitF : 0
+

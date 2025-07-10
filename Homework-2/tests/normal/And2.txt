@@ -1,0 +1,13 @@
+-----------Class A-----------
+--Variables---
+---Methods---
+A.foo : 0
+A.bar : 8
+A.print : 16
+
+-----------Class B-----------
+--Variables---
+---Methods---
+B.foo : 0
+B.t : 8
+

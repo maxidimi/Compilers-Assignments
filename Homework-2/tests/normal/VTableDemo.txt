@@ -1,0 +1,17 @@
+-----------Class A-----------
+--Variables---
+---Methods---
+A.foo : 0
+A.func : 8
+A.bla : 16
+
+-----------Class B-----------
+--Variables---
+---Methods---
+B.baz : 24
+
+-----------Class C-----------
+--Variables---
+---Methods---
+C.bar : 32
+

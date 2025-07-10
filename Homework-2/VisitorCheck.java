@@ -145,7 +145,7 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         // Statements
         n.f8.accept(this, argu);
 
-        // Return expression's type
+        //? Return expression's type, needs check
         String returnExpType = checkForId(n.f10.accept(this, argu));
 
         // Check if the return type is same as in the signature or if it is a subclass
@@ -156,7 +156,15 @@ class VisitorCheck extends GJDepthFirst<String, Void>{
         // Check for overriding - if exists, methods must have same argument types and return type
         if (currentMethodDec.isOverriding()) {
             ClassDec parentClass = symbolTable.getClass(currentClassDec.getParent());
+
+            // If the current parent class doesn't have the method, check its parent class(es)
+            while (parentClass != null && !parentClass.hasMethod(myName)) {
+                parentClass = symbolTable.getClass(parentClass.getParent());
+            }
             MethodDec parentMethod = parentClass.getMethod(myName);
+            if (parentClass == null || parentMethod == null) {
+                throw new Exception("MethodDeclaration: Overriding method " + myName + " not found in any parent class of " + currentClass);
+            }
 
             // Check if the return type is same as in the overriden's signature
             if (!parentMethod.getReturnType().equals(myType)) {

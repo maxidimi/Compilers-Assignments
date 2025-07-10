@@ -1,0 +1,21 @@
+-----------Class A-----------
+--Variables---
+---Methods---
+A.t : 0
+A.t2 : 8
+A.lispy : 16
+A.t3 : 24
+A.t4 : 32
+A.t5 : 40
+A.t6 : 48
+
+-----------Class C-----------
+--Variables---
+---Methods---
+C.test : 0
+
+-----------Class B-----------
+--Variables---
+---Methods---
+B.test2 : 8
+
